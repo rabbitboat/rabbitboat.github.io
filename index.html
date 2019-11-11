@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="Hexo">
+<meta property="og:url" content="http:&#x2F;&#x2F;yoursite.com&#x2F;index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:locale" content="en">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main">
+  
+    <article id="post-lab1--宋恩舟" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/11/11/lab1--%E5%AE%8B%E6%81%A9%E8%88%9F/" class="article-date">
+  <time datetime="2019-11-11T01:54:58.335Z" itemprop="datePublished">2019-11-11</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/11/lab1--%E5%AE%8B%E6%81%A9%E8%88%9F/">lab1--宋恩舟</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="ucore实验报告—LAB1"><a href="#ucore实验报告—LAB1" class="headerlink" title="ucore实验报告—LAB1"></a>ucore实验报告—LAB1</h1><h2 id="练习1"><a href="#练习1" class="headerlink" title="练习1"></a>练习1</h2><blockquote>
+<p>理解通过 make 生成执行文件的过程。(要求在报告中写出对下述问题的回答)<br>在此练习中,大家需要通过阅读代码来了解:<br>1.操作系统镜像文件 ucore.img 是如何一步一步生成的?(需要比较详细地解释 Makefile 中每一条相关命令和命令参数的含义,以及说明命令导致的结果)<br>2.一个被系统认为是符合规范的硬盘主引导扇区的特征是什么?</p>
+</blockquote>
+<h3 id="练习1-1"><a href="#练习1-1" class="headerlink" title="练习1.1"></a>练习1.1</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&gt;$(UCOREIMG): $(kernel) $(bootblock)   </span><br><span class="line">&gt;    $(V)dd if=/dev/zero of=$@ count=10000   </span><br><span class="line">&gt;    $(V)dd if=$(bootblock) of=$@ conv=notrunc   </span><br><span class="line">&gt;   $(V)dd if=$(kernel) of=$@ seek=1 conv=notrunc  </span><br><span class="line">&gt;$(call create_target,ucore.img)</span><br></pre></td></tr></table></figure>
+<p>首先先创建一个大小为10000字节的块儿，然后拷贝bootblock，根据上述代码，我们知道生成镜像文件，首先要生成kernel和bootblock</p>
+<p>生成kernel：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$(kernel): tools/kernel.ld  </span><br><span class="line">$(kernel): $(KOBJS)  </span><br><span class="line">@echo &quot;bbbbbbbbbbbbbbbbbbbbbb$(KOBJS)&quot;  </span><br><span class="line">@echo + ld $@  </span><br><span class="line">$(V)$(LD) $(LDFLAGS) -T tools/kernel.ld -o $@ $(KOBJS)  </span><br><span class="line">@$(OBJDUMP) -S $@ &gt; $(call asmfile,kernel)  </span><br><span class="line">@$(OBJDUMP) -t $@ | $(SED) &apos;1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d&apos; &gt; $&gt;&gt;(call symfile,kernel)  </span><br><span class="line"></span><br><span class="line">通过make V=指令得到执行的具体命令,生成kernel，需要用GCC编译器将kern目录下所有的.c文件全部编译生成.o文件(其实个人感觉就是需要make对.c文件进行编译)</span><br></pre></td></tr></table></figure>
+
+<p>生成bootblock：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&gt;$(bootblock): $(call toobj,$(bootfiles)) | $(call totarget,sign)   </span><br><span class="line">&gt;@echo &quot;========================$(call toobj,$(bootfiles))&quot;  </span><br><span class="line">&gt;@echo + ld $@  </span><br><span class="line">&gt;$(V)$(LD) $(LDFLAGS) -N -e start -Ttext 0x7C00 $^ -o $(call toobj,bootblock)</span><br><span class="line">&gt;@$(OBJDUMP) -S $(call objfile,bootblock) &gt; $(call asmfile,bootblock)  </span><br><span class="line">&gt;@$(OBJCOPY) -S -O binary $(call objfile,bootblock) $(call outfile,bootblock)</span><br><span class="line">&gt;@$(call totarget,sign) $(call outfile,bootblock) $(bootblock)</span><br></pre></td></tr></table></figure>
+<p>同样根据make V=指令打印的结果，得到要生成bootblock，首先需要生成bootasm.o、bootmain.o、sign</p>
+<p>附：生成sign的代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt;$(call add_files_host,tools/sign.c,sign,sign)  </span><br><span class="line">&gt;$(call create_target_host,sign,sign)</span><br></pre></td></tr></table></figure>
+<h3 id="练习1-2"><a href="#练习1-2" class="headerlink" title="练习1.2"></a>练习1.2</h3><p>一个被系统认为是符合规范的硬盘主引导扇区的特征有以下几点：</p>
+<ul>
+<li>磁盘主引导扇区只有512字节</li>
+<li>磁盘最后两个字节为0x55AA</li>
+<li>由不超过466字节的启动代码和不超过64字节的硬盘分区表加上两个字节的结束符组成</li>
+</ul>
+<h2 id="练习2"><a href="#练习2" class="headerlink" title="练习2"></a>练习2</h2><blockquote>
+<p>1.从 CPU加电后执行的第一条指令开始，单步跟踪 BIOS的执行。<br>2.在初始化位置 0x7c00 设置实地址断点,测试断点正常。<br>3.从 0x7c00 开始跟踪代码运行,将单步跟踪反汇编得到的代码与 bootasm.S和 bootblock.asm进行比较。<br>4.自己找一个 bootloader或内核中的代码位置，设置断点并进行测试</p>
+</blockquote>
+<p>首先通过make qemu指令运行出等待调试的qemu虚拟机，然后再打开一个终端，通过下述命令连接到qemu虚拟机：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt;gdb  </span><br><span class="line">&gt;target remote 127.0.0.1:1234</span><br></pre></td></tr></table></figure>
+<p>进入到调试界面：</p>
+<p>输入si命令单步调试，<br>这是另一个终端会打印下一条命令的地址和内容</p>
+<p>然后输入b*0x7c00在初始化位置地址0x7c00设置上断点</p>
+<p>然后输入continue使之继续运行</p>
+<p>这时成功在0x7c00处停止运行，然后我们查看此处的反汇编代码，如下</p>
+<p>对比此时bootasm.S中的起始代码，发现确实是一样的</p>
+<pre><code>----------------
+IN: 
+0x00007c00:  cli    
+
+----------------
+IN: 
+0x00007c01:  cld    
+0x00007c02:  xor    %ax,%ax
+0x00007c04:  mov    %ax,%ds
+0x00007c06:  mov    %ax,%es
+0x00007c08:  mov    %ax,%ss
+
+----------------
+IN: 
+0x00007c0a:  in     $0x64,%al
+
+----------------
+IN: 
+0x00007c0c:  test   $0x2,%al
+0x00007c0e:  jne    0x7c0a
+
+----------------
+IN: 
+0x00007c10:  mov    $0xd1,%al
+0x00007c12:  out    %al,$0x64
+0x00007c14:  in     $0x64,%al
+0x00007c16:  test   $0x2,%al
+0x00007c18:  jne    0x7c14
+
+----------------
+IN: 
+0x00007c1a:  mov    $0xdf,%al
+0x00007c1c:  out    %al,$0x60
+0x00007c1e:  lgdtw  0x7c6c
+0x00007c23:  mov    %cr0,%eax
+0x00007c26:  or     $0x1,%eax
+0x00007c2a:  mov    %eax,%cr0
+
+----------------
+IN: 
+0x00007c2d:  ljmp   $0x8,$0x7c32
+
+----------------
+IN: 
+0x00007c32:  mov    $0x10,%ax
+0x00007c36:  mov    %eax,%ds
+
+----------------
+IN: 
+0x00007c38:  mov    %eax,%es
+
+----------------
+IN: 
+0x00007c3a:  mov    %eax,%fs
+0x00007c3c:  mov    %eax,%gs
+0x00007c3e:  mov    %eax,%ss
+
+----------------
+IN: 
+0x00007c40:  mov    $0x0,%ebp
+
+----------------
+IN: 
+0x00007c45:  mov    $0x7c00,%esp
+0x00007c4a:  call   0x7d0d
+
+----------------
+IN: 
+0x00007d0d:  push   %ebp</code></pre><p>附加：单步跟踪调试:<br>1 修改 lab1/tools/gdbinit,内容为:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">set architecture i8086  </span><br><span class="line">target remote :1234  </span><br><span class="line">//file bin/kernel  </span><br><span class="line">//target remote :1234  </span><br><span class="line">//break kern_init  </span><br><span class="line">//continue</span><br></pre></td></tr></table></figure>
+<p>2 在 lab1目录下，执行  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt;make debug</span><br></pre></td></tr></table></figure>
+<p>3 在看到gdb的调试界面(gdb)后，在gdb调试界面下执行如下命令  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt;si</span><br></pre></td></tr></table></figure>
+<p>即可单步跟踪BIOS了。  </p>
+<p>4 在gdb界面下，可通过如下命令来看BIOS的代码  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt;x /2i $pc  //显示当前eip处的汇编指令</span><br></pre></td></tr></table></figure>
+<h2 id="练习3"><a href="#练习3" class="headerlink" title="练习3"></a>练习3</h2><blockquote>
+<p>分析从bootloader进入保护模式的过程。BIOS 将通过读取硬盘主引导扇区到内存，并转跳到对应内存中的位置执行 bootloader。请分析bootloader是如何完成从实模式进入保护模式的</p>
+</blockquote>
+<p>1、关闭中断，将各个段寄存器重置</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&gt;cli               # Disable interrupts  </span><br><span class="line">&gt;cld               # String operations increment  </span><br><span class="line">&gt;xorw %ax, %ax     # Segment number zero  </span><br><span class="line">&gt;movw %ax, %ds     # -&gt; Data Segment  </span><br><span class="line">&gt;movw %ax, %es     # -&gt; Extra Segment  </span><br><span class="line">&gt;movw %ax, %ss     # -&gt; Stack Segment</span><br></pre></td></tr></table></figure>
+<p>2.开启A20<br>然后就是将A20置1，简单解释一下A20，当 A20 地址线控制禁止时，则程序就像在 8086 中运行，1MB 以上的地是不可访问的。而在保护模式下 A20 地址线控制是要打开的，所以需要通过将键盘控制器上的A20线置于高电位，使得全部32条地址线可用。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&gt;seta20.1:  </span><br><span class="line">    &gt;inb $0x64, %al    # 读取状态寄存器,等待8042键盘控制器闲置  </span><br><span class="line">    &gt;testb $0x2, %al   # 判断输入缓存是否为空  </span><br><span class="line">    &gt;jnz seta20.1  </span><br><span class="line">    &gt;movb $0xd1, %al    # 0xd1表示写输出端口命令，参数随后通过0x60端口写入  </span><br><span class="line">    &gt;outb %al, $0x64     </span><br><span class="line">&gt;seta20.2:  </span><br><span class="line">    inb $0x64, %al      </span><br><span class="line">    testb $0x2, %al  </span><br><span class="line">    jnz seta20.2  </span><br><span class="line">    movb $0xdf, %al   # 通过0x60写入数据11011111 即将A20置1  </span><br><span class="line">    outb %al, $0x60</span><br></pre></td></tr></table></figure>
+<p>3、加载GDT表</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt;lgdt gdtdesc</span><br></pre></td></tr></table></figure>
+<p>4、将CR0的第0位置1</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&gt;movl %cr0, %eax  </span><br><span class="line">    orl $CR0_PE_ON, %eax  </span><br><span class="line">    movl %eax, %cr0</span><br></pre></td></tr></table></figure>
+<p>5、长跳转到32位代码段，重装CS和EIP</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt;ljmp $PROT_MODE_CSEG, $protcseg</span><br></pre></td></tr></table></figure>
+<p>6、重装DS、ES等段寄存器等</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&gt;movw $PROT_MODE_DSEG, %ax   # Our data segment selector  </span><br><span class="line">&gt;movw %ax, %ds     # -&gt; DS: Data Segment  </span><br><span class="line">movw %ax, %es     # -&gt; ES: Extra Segment  </span><br><span class="line">movw %ax, %fs     # -&gt; FS  </span><br><span class="line">movw %ax, %gs     # -&gt; GS  </span><br><span class="line">movw %ax, %ss     # -&gt; SS: Stack Segment</span><br></pre></td></tr></table></figure>
+<p>7、转到保护模式完成，进入boot主方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&gt;movl $0x0, %ebp  </span><br><span class="line">movl $start, %esp  </span><br><span class="line">call bootmain</span><br></pre></td></tr></table></figure>
+<h2 id="练习4"><a href="#练习4" class="headerlink" title="练习4"></a>练习4</h2><blockquote>
+<p>分析bootloader加载ELF格式的OS的过程</p>
+<ol>
+<li>bootloader如何读取硬盘扇区的？</li>
+<li>bootloader是如何加载 ELF格式的 OS？<br>这里主要分析是bootmain函数，</li>
+</ol>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&gt;bootmain(void) &#123;  </span><br><span class="line">    readseg((uintptr_t)ELFHDR, SECTSIZE * 8, 0);  </span><br><span class="line">    if (ELFHDR-&gt;e_magic != ELF_MAGIC) &#123;  </span><br><span class="line">        goto bad;  </span><br><span class="line">    &#125;  </span><br><span class="line">    struct proghdr *ph, *eph;  </span><br><span class="line">    ph = (struct proghdr *)((uintptr_t)ELFHDR + ELFHDR-&gt;e_phoff);  </span><br><span class="line">    eph = ph + ELFHDR-&gt;e_phnum;  </span><br><span class="line">    for (; ph &lt; eph; ph ++) &#123;  </span><br><span class="line">        readseg(ph-&gt;p_va &amp; 0xFFFFFF, ph-&gt;p_memsz, ph-&gt;p_offset);  </span><br><span class="line">    &#125;  </span><br><span class="line">    ((void (*)(void))(ELFHDR-&gt;e_entry &amp; 0xFFFFFF))();  </span><br><span class="line">bad:  </span><br><span class="line">    outw(0x8A00, 0x8A00);  </span><br><span class="line">    outw(0x8A00, 0x8E00);  </span><br><span class="line">    while (1);  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>bootloader读取硬盘扇区<br>根据上述bootmain函数分析，首先是由readseg函数读取硬盘扇区，而readseg函数则循环调用了真正读取硬盘扇区的函数readsect来每次读出一个扇区 (其实这个在源代码中都有注释的)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&gt;readsect(void *dst, uint32_t secno) &#123;  </span><br><span class="line">    waitdisk(); // 等待硬盘就绪  </span><br><span class="line">    // 写地址0x1f2~0x1f5,0x1f7,发出读取磁盘的命令  </span><br><span class="line">    outb(0x1F2, 1);  </span><br><span class="line">    outb(0x1F3, secno &amp; 0xFF);  </span><br><span class="line">    outb(0x1F4, (secno &gt;&gt; 8) &amp; 0xFF);  </span><br><span class="line">    outb(0x1F5, (secno &gt;&gt; 16) &amp; 0xFF);  </span><br><span class="line">    outb(0x1F6, ((secno &gt;&gt; 24) &amp; 0xF) | 0xE0);  </span><br><span class="line">    outb(0x1F7, 0x20);  </span><br><span class="line">    waitdisk();  </span><br><span class="line">    insl(0x1F0, dst, SECTSIZE / 4);//读取一个扇区  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>bootloader加载 ELF格式的 OS<br>读取完磁盘之后，开始加载ELF格式的文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">&gt;bootmain(void) &#123;  </span><br><span class="line">    ..........  </span><br><span class="line">    //首先判断是不是ELF  </span><br><span class="line">    if (ELFHDR-&gt;e_magic != ELF_MAGIC) &#123;  </span><br><span class="line">        goto bad;                   </span><br><span class="line">    &#125;  </span><br><span class="line">    struct proghdr *ph, *eph;  </span><br><span class="line">    //ELF头部有描述ELF文件应加载到内存什么位置的描述表，这里读取出来将之存入ph  </span><br><span class="line">    ph = (struct proghdr *)((uintptr_t)ELFHDR + ELFHDR-&gt;e_phoff);  </span><br><span class="line">    eph = ph + ELFHDR-&gt;e_phnum;  </span><br><span class="line">    //按照程序头表的描述，将ELF文件中的数据载入内存  </span><br><span class="line">    for (; ph &lt; eph; ph ++) &#123;  </span><br><span class="line">        readseg(ph-&gt;p_va &amp; 0xFFFFFF, ph-&gt;p_memsz, ph-&gt;p_offset);  </span><br><span class="line">    &#125;  </span><br><span class="line">    //根据ELF头表中的入口信息，找到内核的入口并开始运行   </span><br><span class="line">    ((void (*)(void))(ELFHDR-&gt;e_entry &amp; 0xFFFFFF))();  </span><br><span class="line">bad:  </span><br><span class="line">    ..........  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="练习5"><a href="#练习5" class="headerlink" title="练习5"></a>练习5</h2><blockquote>
+<p>完成kdebug.c中函数print_stackframe的实现，可以通过函数&gt;print_stackframe来跟踪函数调用堆栈中记录的返回地址。</p>
+</blockquote>
+<p>根据注释我们可以更好地编写代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">void</span><br><span class="line">print_stackframe(void) &#123;</span><br><span class="line">     /* LAB1 YOUR CODE : STEP 1 */</span><br><span class="line">     /* (1) call read_ebp() to get the value of ebp. the type is (uint32_t);</span><br><span class="line">      * (2) call read_eip() to get the value of eip. the type is (uint32_t);</span><br><span class="line">      * (3) from 0 .. STACKFRAME_DEPTH</span><br><span class="line">      *    (3.1) printf value of ebp, eip</span><br><span class="line">      *    (3.2) (uint32_t)calling arguments [0..4] = the contents in address (unit32_t)ebp +2 [0..4]</span><br><span class="line">      *    (3.3) cprintf(&quot;\n&quot;);</span><br><span class="line">      *    (3.4) call print_debuginfo(eip-1) to print the C calling function name and line number, etc.</span><br><span class="line">      *    (3.5) popup a calling stackframe</span><br><span class="line">      *           NOTICE: the calling funciton&apos;s return addr eip  = ss:[ebp+4]</span><br><span class="line">      *                   the calling funciton&apos;s ebp = ss:[ebp]</span><br><span class="line">      */</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后我么你对应的实现代码即可,具体的函数需要查看接口</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">void print_stackframe(void) &#123;      </span><br><span class="line">    uint32_t ebp=read_ebp();		//(1) call read_ebp() to get the value of ebp. the type is (uint32_t)</span><br><span class="line">    uint32_t eip=read_eip();		//(2) call read_eip() to get the value of eip. the type is (uint32_t)</span><br><span class="line">    for(int i=0;i&lt;STACKFRAME_DEPTH&amp;&amp;ebp!=0;i++)&#123;	//(3) from 0 .. STACKFRAME_DEPTH</span><br><span class="line">          cprintf(&quot;ebp:0x%08x   eip:0x%08x &quot;,ebp,eip);	//(3.1)printf value of ebp, eip</span><br><span class="line">          uint32_t *tmp=(uint32_t *)ebp+2;</span><br><span class="line">          cprintf(&quot;arg :0x%08x 0x%08x 0x%08x 0x%08x&quot;,*(tmp+0),*(tmp+1),*(tmp+2),*(tmp+3));	//(3.2)(uint32_t)calling arguments [0..4] = the contents in address (unit32_t)ebp +2 [0..4]</span><br><span class="line">          cprintf(&quot;\n&quot;);			//(3.3) cprintf(&quot;\n&quot;);</span><br><span class="line">          print_debuginfo(eip-1);	//(3.4) call print_debuginfo(eip-1) to print the C calling function name and line number, etc.</span><br><span class="line">          eip=((uint32_t *)ebp)[1];</span><br><span class="line">          ebp=((uint32_t *)ebp)[0];	//(3.5) popup a calling stackframe</span><br><span class="line">      &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="练习6"><a href="#练习6" class="headerlink" title="练习6"></a>练习6</h2><blockquote>
+<p>1.中断向量表中一个表项占多少字节？其中哪几位代表中断处理代码的入口？<br>2.中断向量表一个表项占用8字节，其中2-3字节是段选择子，0-1字节和6-7字节拼成位移，<br>两者联合便是中断处理程序的入口地址。<br>3.请编程完善kern/trap/trap.c中对中断向量表进行初始化的函数idt_init。<br>4.请编程完善trap.c中的中断处理函数trap，在对时钟中断进行处理的部分填写trap函数</p>
+</blockquote>
+<p>中断向量表一个表项占用8字节，其中2-3字节是段选择子，0-1字节和6-7字节拼成位移，<br>两者联合便是中断处理程序的入口地址。<br>跟上一题一样，完全按照注释与给出的文档里的信息来补全代码。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">void idt_init(void) &#123;</span><br><span class="line">     /* LAB1 YOUR CODE : STEP 2 */</span><br><span class="line">     /* (1) Where are the entry addrs of each Interrupt Service Routine (ISR)?</span><br><span class="line">      *     All ISR&apos;s entry addrs are stored in __vectors. where is uintptr_t __vectors[] ?</span><br><span class="line">      *     __vectors[] is in kern/trap/vector.S which is produced by tools/vector.c</span><br><span class="line">      *     (try &quot;make&quot; command in lab1, then you will find vector.S in kern/trap DIR)</span><br><span class="line">      *     You can use  &quot;extern uintptr_t __vectors[];&quot; to define this extern variable which will be used later.</span><br><span class="line">      * (2) Now you should setup the entries of ISR in Interrupt Description Table (IDT).</span><br><span class="line">      *     Can you see idt[256] in this file? Yes, it&apos;s IDT! you can use SETGATE macro to setup each item of IDT</span><br><span class="line">      * (3) After setup the contents of IDT, you will let CPU know where is the IDT by using &apos;lidt&apos; instruction.</span><br><span class="line">      *     You don&apos;t know the meaning of this instruction? just google it! and check the libs/x86.h to know more.</span><br><span class="line">      *     Notice: the argument of lidt is idt_pd. try to find it!</span><br><span class="line">      */</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>填充的代码为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">void idt_init(void) &#123;</span><br><span class="line">	extern uintptr_t __vectors[];			//声明__vertors[],其中存放着中断服务程序的入口地址</span><br><span class="line">	int i;</span><br><span class="line">	for(i=0;i&lt;256;i++) &#123;</span><br><span class="line">		SETGATE(idt[i],0,GD_KTEXT,__vectors[i],DPL_KERNEL);</span><br><span class="line">	 &#125;</span><br><span class="line">	SETGATE(idt[T_SWITCH_TOK],0,GD_KTEXT,__vectors[T_SWITCH_TOK],DPL_USER);		//填充中断描述符表IDT</span><br><span class="line">	lidt(&amp;idt_pd);				//使用lidt指令加载中断描述符表			</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>请编程完善 trap.c 中的中断处理函数 trap,在对时钟中断进行处理的部分填写 trap 函数中处理时钟中断的部分,使操作系统每遇到 100 次时钟中断后,调用 print_ticks 子程序,向屏幕上打印一行文字”100 ticks”。 </p>
+<div align=center>![](./show1.png)</div>
+效果图如下
+<div align=center>![](./show2.png)</div>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/11/11/lab1--%E5%AE%8B%E6%81%A9%E8%88%9F/" data-id="ck2ufo1zt0000hcuy637jhhnv" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">November 2019</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2019/11/11/lab1--%E5%AE%8B%E6%81%A9%E8%88%9F/">lab1--宋恩舟</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2019 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>
