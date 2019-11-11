@@ -6,13 +6,17 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>Archives: 2019/11 | Rabbitboat</title>
+  <title>Apache服务器搭建 | Rabbitboat</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Rabbitboat">
-<meta property="og:url" content="http:&#x2F;&#x2F;yoursite.com&#x2F;archives&#x2F;2019&#x2F;11&#x2F;index.html">
+  <meta name="description" content="Apache服务器配置 实验声明：本次实验基于KaliLinux环境（Debian.x 64位）">
+<meta name="keywords" content="计网">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Apache服务器搭建">
+<meta property="og:url" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2019&#x2F;11&#x2F;11&#x2F;Apache%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA&#x2F;index.html">
 <meta property="og:site_name" content="Rabbitboat">
+<meta property="og:description" content="Apache服务器配置 实验声明：本次实验基于KaliLinux环境（Debian.x 64位）">
 <meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2019-11-11T15:44:32.139Z">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="Rabbitboat" type="application/atom+xml">
@@ -139,74 +143,100 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-Apache服务器搭建" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2019" class="archive-year">2019</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/11/11/love/" class="archive-article-date">
-  	<time datetime="2019-11-11T15:47:54.850Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-11-11</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/11/11/love/">love</a>
+    <h1 class="article-title" itemprop="name">
+      Apache服务器搭建
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag article-tag-list-link color1">兔兔和小船</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/11/11/Apache%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA/" class="archive-article-date">
+        
+        <a href="/2019/11/11/Apache%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA/" class="archive-article-date">
   	<time datetime="2019-11-11T15:39:24.607Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-11-11</time>
 </a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/11/11/Apache%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA/">Apache服务器搭建</a>
-    </h1>
-  
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="Apache服务器配置-实验"><a href="#Apache服务器配置-实验" class="headerlink" title="Apache服务器配置 实验"></a>Apache服务器配置 实验</h1><p>声明：本次实验基于KaliLinux环境（Debian.x 64位）</p>
+<a id="more"></a>
+<h2 id="1-安装Apache服务器"><a href="#1-安装Apache服务器" class="headerlink" title="1.安装Apache服务器"></a>1.安装Apache服务器</h2><p>利用Kali自带的Apache服务器环境，进行安装</p>
+<blockquote>
+<p>root@Sezangle:~# apt-get install apache2\</p>
+</blockquote>
+<p>之后开启Apache服务</p>
+<blockquote>
+<p>root@Sezangle:~# sudo service apache2 start<br>打开浏览器输入127.0.0.1或者本机IP地址，发现访问成功，即可证明Apache服务开启。</p>
+</blockquote>
+<h2 id="2-访问自制网页"><a href="#2-访问自制网页" class="headerlink" title="2.访问自制网页"></a>2.访问自制网页</h2><p>创建基本访问网页Index.html，将其放置于Apache根服务器中，将其原本默认的根服务器替换掉，在Kali操作系统中，如何找到Apache根服务器所在位置？是我们遇到的第一个问题，经过查询相关资料，我们得知，KaliLinux服务器根目录常在位置为：</p>
+<blockquote>
+<p>home/Var/WWW/html</p>
+</blockquote>
+<p>之后，我们将该目录所在位置的默认网址替换掉，替换为我们自己的index网页，但是替换过后，我们输入127.0.0.1，却发现，网页依然是原始的Apache自带的index网页，于是我们再次查阅相关资料得知，Apache<br>服务器内的配置文件需要我们进行修改，从而实现我们所需功能。我们找到Apache内的配置文件</p>
+<blockquote>
+<p>Apache2.conf</p>
+</blockquote>
+<p>在其内部找到代码并修改如下，</p>
+<blockquote>
+<p>&lt;Directory /var/www&gt;<br>    Options Indexes FollowSymLinks<br>    AllowOverride None<br>    Require all granted<br></Directory></p>
+</blockquote>
+<p>之后，我们成功对自己编写的index网页进行了访问。</p>
+<h2 id="3-实现虚拟主机相关功能"><a href="#3-实现虚拟主机相关功能" class="headerlink" title="3.实现虚拟主机相关功能"></a>3.实现虚拟主机相关功能</h2><p>在此部分，我们主要实现了对服务器的域名访问、端口访问等访问方式。</p>
+<h3 id="1-域名访问"><a href="#1-域名访问" class="headerlink" title="1.域名访问"></a>1.域名访问</h3><p>如何通过访问特定域名实现对服务器的访问呢？对于KaliLinux，我们查阅了相关资料，得到方法如下，<br>首先访问配置文件所在位置：</p>
+<blockquote>
+<p>home/etc/hosts</p>
+</blockquote>
+<p>之后对hosts内的配置文件进行修改：</p>
+<blockquote>
+<p>127.0.0.1    localhost<br>127.0.1.1    Sezangle.localdomain    Sezangle<br>127.0.0.1  sez.k</p>
+</blockquote>
+<p>如上述文件所示，sez.k为我们新添加的域名，之后对该域名进行访问，成功实现。</p>
+<h3 id="2-端口访问"><a href="#2-端口访问" class="headerlink" title="2.端口访问"></a>2.端口访问</h3><p>如何规定客户机访问服务器的端口呢？我们查阅相关资料，依旧需要对服务器内的配置文件进行修改，方法如下，<br>首先添加我们需要的端口号，访问配置文件位置：</p>
+<blockquote>
+<p>home/etc/apache2/ports.conf<br>Listen 80<br>Listen 81</p>
+</blockquote>
+<p>之后，我们对另一处配置进行设置，访问配置文件位置：</p>
+<blockquote>
+<p>home/etc/apache2/sties-available/000-default.conf</p>
+</blockquote>
+<p>对其内部进行设置</p>
+<blockquote>
+<p>&lt;VirtualHost *:80&gt;<br>    # The ServerName directive sets the request scheme, hostname and port that<br>    # the server uses to identify itself. This is used when creating<br>    # redirection URLs. In the context of virtual hosts, the ServerName<br>    # specifies what hostname must appear in the request’s Host: header to<br>    # match this virtual host. For the default virtual host (this file) this<br>    # value is not decisive as it is used as a last resort host regardless.<br>    # However, you must set it for any further virtual host explicitly.<br>    #ServerName <a href="http://www.example.com\" target="_blank" rel="noopener">www.example.com\</a><br>    ServerAdmin webmaster@localhost<br>    DocumentRoot /var/www/html<br>    # Available loglevels: trace8, …, trace1, debug, info, notice, warn,<br>    # error, crit, alert, emerg.<br>    # It is also possible to configure the loglevel for particular<br>    # modules, e.g.<br>    #LogLevel info ssl:warn<br>    ErrorLog ${APACHE_LOG_DIR}/error.log<br>    CustomLog ${APACHE_LOG_DIR}/access.log combined<br>    # For most configuration files from conf-available/, which are<br>    # enabled or disabled at a global level, it is possible to<br>    # include a line for only one particular virtual host. For example the<br>    # following line enables the CGI configuration for this host only<br>    # after it has been globally disabled with “a2disconf”.<br>    #Include conf-available/serve-cgi-bin.conf<br></VirtualHost><br>&lt;VirtualHost *:81&gt;<br>    # The ServerName directive sets the request scheme, hostname and port that<br>    # the server uses to identify itself. This is used when creating<br>    # redirection URLs. In the context of virtual hosts, the ServerName<br>    # specifies what hostname must appear in the request’s Host: header to<br>    # match this virtual host. For the default virtual host (this file) this<br>    # value is not decisive as it is used as a last resort host regardless.<br>    # However, you must set it for any further virtual host explicitly.<br>    #ServerName <a href="http://www.example.com\" target="_blank" rel="noopener">www.example.com\</a><br>    ServerAdmin webmaster@localhost<br>    DocumentRoot /var/www2<br>    # Available loglevels: trace8, …, trace1, debug, info, notice, warn,<br>    # error, crit, alert, emerg.<br>    # It is also possible to configure the loglevel for particular<br>    # modules, e.g.<br>    #LogLevel info ssl:warn<br>    ErrorLog ${APACHE_LOG_DIR}/error.log<br>    CustomLog ${APACHE_LOG_DIR}/access.log combined<br>    # For most configuration files from conf-available/, which are<br>    # enabled or disabled at a global level, it is possible to<br>    # include a line for only one particular virtual host. For example the<br>    # following line enables the CGI configuration for this host only<br>    # after it has been globally disabled with “a2disconf”.<br>    #Include conf-available/serve-cgi-bin.conf<br></VirtualHost><br>#vim: syntax=apache ts=4 sw=4 sts=4 sr noet</p>
+</blockquote>
 
-        <div class="article-info info-on-right">
-          
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" target="_blank" rel="noopener" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -218,57 +248,128 @@
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" target="_blank" rel="noopener" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" target="_blank" rel="noopener" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" target="_blank" rel="noopener" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" target="_blank" rel="noopener" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" target="_blank" rel="noopener" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" target="_blank" rel="noopener" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" target="_blank" rel="noopener" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" target="_blank" rel="noopener" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" target="_blank" rel="noopener" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;" target="_blank" rel="noopener"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2019/11/11/Apache%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/11/11/lab1--%E5%AE%8B%E6%81%A9%E8%88%9F/" class="archive-article-date">
-  	<time datetime="2019-11-11T01:54:58.335Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-11-11</time>
-</a>
+<nav id="article-nav">
+  
+    <a href="/2019/11/11/love/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          love
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/11/11/lab1--%E5%AE%8B%E6%81%A9%E8%88%9F/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">操作系统</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" target="_blank" rel="noopener" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/11/11/lab1--%E5%AE%8B%E6%81%A9%E8%88%9F/">操作系统</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag article-tag-list-link color5">操作系统</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Apache服务器配置-实验"><span class="toc-number">1.</span> <span class="toc-text">Apache服务器配置 实验</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-安装Apache服务器"><span class="toc-number">1.1.</span> <span class="toc-text">1.安装Apache服务器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-访问自制网页"><span class="toc-number">1.2.</span> <span class="toc-text">2.访问自制网页</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-实现虚拟主机相关功能"><span class="toc-number">1.3.</span> <span class="toc-text">3.实现虚拟主机相关功能</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-域名访问"><span class="toc-number">1.3.1.</span> <span class="toc-text">1.域名访问</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-端口访问"><span class="toc-number">1.3.2.</span> <span class="toc-text">2.端口访问</span></a></li></ol></li></ol></li></ol>
+                    </div>
+                </span>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
+        
+    </div>
+</aside>
+
+
+
   
   
-    </div></section>
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -291,8 +392,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
