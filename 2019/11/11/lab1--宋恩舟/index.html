@@ -16,8 +16,11 @@
 <meta property="og:site_name" content="Rabbitboat">
 <meta property="og:description" content="ucore实验报告—LAB1练习1">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2019-11-11T15:43:07.195Z">
+<meta property="og:image" content="h:%5Cmarkdownsource%5Cshow1.png">
+<meta property="og:image" content="h:%5Cmarkdownsource%5Cshow2.png">
+<meta property="og:updated_time" content="2019-11-11T16:04:55.338Z">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="h:%5Cmarkdownsource%5Cshow1.png">
   
     <link rel="alternative" href="/atom.xml" title="Rabbitboat" type="application/atom+xml">
   
@@ -314,10 +317,8 @@ IN:
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">void idt_init(void) &#123;</span><br><span class="line">     /* LAB1 YOUR CODE : STEP 2 */</span><br><span class="line">     /* (1) Where are the entry addrs of each Interrupt Service Routine (ISR)?</span><br><span class="line">      *     All ISR&apos;s entry addrs are stored in __vectors. where is uintptr_t __vectors[] ?</span><br><span class="line">      *     __vectors[] is in kern/trap/vector.S which is produced by tools/vector.c</span><br><span class="line">      *     (try &quot;make&quot; command in lab1, then you will find vector.S in kern/trap DIR)</span><br><span class="line">      *     You can use  &quot;extern uintptr_t __vectors[];&quot; to define this extern variable which will be used later.</span><br><span class="line">      * (2) Now you should setup the entries of ISR in Interrupt Description Table (IDT).</span><br><span class="line">      *     Can you see idt[256] in this file? Yes, it&apos;s IDT! you can use SETGATE macro to setup each item of IDT</span><br><span class="line">      * (3) After setup the contents of IDT, you will let CPU know where is the IDT by using &apos;lidt&apos; instruction.</span><br><span class="line">      *     You don&apos;t know the meaning of this instruction? just google it! and check the libs/x86.h to know more.</span><br><span class="line">      *     Notice: the argument of lidt is idt_pd. try to find it!</span><br><span class="line">      */</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>填充的代码为</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">void idt_init(void) &#123;</span><br><span class="line">	extern uintptr_t __vectors[];			//声明__vertors[],其中存放着中断服务程序的入口地址</span><br><span class="line">	int i;</span><br><span class="line">	for(i=0;i&lt;256;i++) &#123;</span><br><span class="line">		SETGATE(idt[i],0,GD_KTEXT,__vectors[i],DPL_KERNEL);</span><br><span class="line">	 &#125;</span><br><span class="line">	SETGATE(idt[T_SWITCH_TOK],0,GD_KTEXT,__vectors[T_SWITCH_TOK],DPL_USER);		//填充中断描述符表IDT</span><br><span class="line">	lidt(&amp;idt_pd);				//使用lidt指令加载中断描述符表			</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>请编程完善 trap.c 中的中断处理函数 trap,在对时钟中断进行处理的部分填写 trap 函数中处理时钟中断的部分,使操作系统每遇到 100 次时钟中断后,调用 print_ticks 子程序,向屏幕上打印一行文字”100 ticks”。 </p>
-<div align=center>![](./show1.png)</div>
-效果图如下
-<div align=center>![](./show2.png)</div>
+<p>请编程完善 trap.c 中的中断处理函数 trap,在对时钟中断进行处理的部分填写 trap 函数中处理时钟中断的部分,使操作系统每遇到 100 次时钟中断后,调用 print_ticks 子程序,向屏幕上打印一行文字”100 ticks”。<br><img src="H:%5Cmarkdownsource%5Cshow1.png" alt="avatar"><br>效果图如下<br><img src="H:%5Cmarkdownsource%5Cshow2.png" alt="avatar"></p>
+
       
 
       
@@ -558,11 +559,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color3">计网</a>
+                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color5">操作系统</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color5">操作系统</a>
+                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color3">计网</a>
               </li>
              
               <li class="article-tag-list-item">
