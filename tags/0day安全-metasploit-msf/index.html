@@ -6,22 +6,14 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>cve-2019-14287 | Rabbitboat</title>
+  <title>Tag: -0day安全 -metasploit -msf | Rabbitboat</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="CVE-2019-14287(Linux sudo漏洞分析及复现)1.漏洞复现首先添加用户（为用户设置密码）">
-<meta name="keywords" content="cve漏洞">
-<meta property="og:type" content="article">
-<meta property="og:title" content="cve-2019-14287">
-<meta property="og:url" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2019&#x2F;11&#x2F;12&#x2F;cve-2019-14287&#x2F;index.html">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="Rabbitboat">
+<meta property="og:url" content="http:&#x2F;&#x2F;yoursite.com&#x2F;tags&#x2F;0day%E5%AE%89%E5%85%A8-metasploit-msf&#x2F;index.html">
 <meta property="og:site_name" content="Rabbitboat">
-<meta property="og:description" content="CVE-2019-14287(Linux sudo漏洞分析及复现)1.漏洞复现首先添加用户（为用户设置密码）">
 <meta property="og:locale" content="en">
-<meta property="og:image" content="https:&#x2F;&#x2F;github.com&#x2F;rabbitboat&#x2F;IMG&#x2F;raw&#x2F;master&#x2F;image&#x2F;cve-2019-14287&#x2F;shell%E6%8F%90%E6%9D%83%E6%BC%8F%E6%B4%9E-%E9%85%8D%E7%BD%AE.png">
-<meta property="og:image" content="https:&#x2F;&#x2F;github.com&#x2F;rabbitboat&#x2F;IMG&#x2F;raw&#x2F;master&#x2F;image&#x2F;cve-2019-14287&#x2F;shell%E6%8F%90%E6%9D%83%E6%BC%8F%E6%B4%9E.png">
-<meta property="og:image" content="https:&#x2F;&#x2F;github.com&#x2F;rabbitboat&#x2F;IMG&#x2F;raw&#x2F;master&#x2F;image&#x2F;cve-2019-14287&#x2F;shell%E6%8F%90%E6%9D%83%E6%BC%8F%E6%B4%9E-%E5%90%8E.png">
-<meta property="og:updated_time" content="2019-11-12T15:55:33.257Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https:&#x2F;&#x2F;github.com&#x2F;rabbitboat&#x2F;IMG&#x2F;raw&#x2F;master&#x2F;image&#x2F;cve-2019-14287&#x2F;shell%E6%8F%90%E6%9D%83%E6%BC%8F%E6%B4%9E-%E9%85%8D%E7%BD%AE.png">
   
     <link rel="alternative" href="/atom.xml" title="Rabbitboat" type="application/atom+xml">
   
@@ -153,240 +145,61 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-cve-2019-14287" class="article article-type-post " itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
+            
   
-    <h1 class="article-title" itemprop="name">
-      cve-2019-14287
+  
+    
+    
+      
+      
+      <section class="archives-wrap">
+        <div class="archive-year-wrap">
+          <a href="/archives/2019" class="archive-year">2019</a>
+        </div>
+        <div class="archives">
+    
+    <article class="archive-article archive-type-post">
+  <div class="archive-article-inner">
+    <header class="archive-article-header">
+      	<div class="article-meta">
+	      	
+<a href="/2019/11/14/0day%E5%AE%89%E5%85%A82--metaspoit%E5%BC%80%E5%8F%91exploit/" class="archive-article-date">
+  	<time datetime="2019-11-13T16:01:10.651Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-11-14</time>
+</a>
+        </div>
+    	 
+  
+    <h1 itemprop="name">
+      <a class="archive-article-title" href="/2019/11/14/0day%E5%AE%89%E5%85%A82--metaspoit%E5%BC%80%E5%8F%91exploit/">0day安全2--metaspoit开发exploit</a>
     </h1>
   
 
-        
-        
-        <!-- 不蒜子统计 -->
-        <span id="busuanzi_container_page_pv" style='display:none' class="archive-article-date">
-              <i class="icon-smile icon"></i> 阅读数：<span id="busuanzi_value_page_pv"></span>次
-        </span>
-
-<a href="/2019/11/12/cve-2019-14287/" class="archive-article-date">
-  	<time datetime="2019-11-12T15:30:33.607Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-11-12</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="CVE-2019-14287-Linux-sudo漏洞分析及复现"><a href="#CVE-2019-14287-Linux-sudo漏洞分析及复现" class="headerlink" title="CVE-2019-14287(Linux sudo漏洞分析及复现)"></a>CVE-2019-14287(Linux sudo漏洞分析及复现)</h1><h2 id="1-漏洞复现"><a href="#1-漏洞复现" class="headerlink" title="1.漏洞复现"></a>1.漏洞复现</h2><p>首先添加用户（为用户设置密码）</p>
-<a id="more"></a>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">root@dziy:~# useradd 4042017024sez</span><br><span class="line">root@dziy:~# passwd 4042017024sez</span><br><span class="line">输入新的 UNIX 密码：</span><br><span class="line">重新输入新的 UNIX 密码：</span><br><span class="line">passwd：已成功更新密码</span><br></pre></td></tr></table></figure>
-<p>之后在etc/sudoers文件中，添加相关修改</p>
-<p><img src="https://github.com/rabbitboat/IMG/raw/master/image/cve-2019-14287/shell%E6%8F%90%E6%9D%83%E6%BC%8F%E6%B4%9E-%E9%85%8D%E7%BD%AE.png" alt="show1"></p>
-<p>如上图所示<br>之后进行提权的相关工作</p>
-<p><img src="https://github.com/rabbitboat/IMG/raw/master/image/cve-2019-14287/shell%E6%8F%90%E6%9D%83%E6%BC%8F%E6%B4%9E.png" alt="show1"></p>
-<p>之后进行提权</p>
-<p><img src="https://github.com/rabbitboat/IMG/raw/master/image/cve-2019-14287/shell%E6%8F%90%E6%9D%83%E6%BC%8F%E6%B4%9E-%E5%90%8E.png" alt="show1"></p>
-<p>可见，提权成功。</p>
-<h2 id="2-漏洞原理分析"><a href="#2-漏洞原理分析" class="headerlink" title="2.漏洞原理分析"></a>2.漏洞原理分析</h2><p>在官方代码仓库找到提交的修复代码：<a href="https://www.sudo.ws/repos/sudo/rev/83db8dba09e7。" target="_blank" rel="noopener">https://www.sudo.ws/repos/sudo/rev/83db8dba09e7。</a></p>
-<p>从提交的代码来看，只修改了 lib/util/strtoid.c。strtoid.c 中定义的 sudo_strtoid_v1 函数负责解析参数中指定的 UID 字符串，补丁关键代码：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/* Disallow id -1, which means &quot;no change&quot;. */if (!valid_separator(p, ep, sep) || llval == -1 || llval == (id_t)UINT_MAX) &#123;  if (errstr != NULL)    *errstr = N_(&quot;invalid value&quot;);  errno = EINVAL;  goto done; &#125;</span><br></pre></td></tr></table></figure>
-
-<p>llval 变量为解析后的值，不允许 llval 为 -1 和 UINT_MAX（4294967295）。</p>
-<p>也就是补丁只限制了取值而已，从漏洞行为来看，如果为 -1，最后得到的 UID 却是 0，为什么不能为 -1？当 UID 为 -1 的时候，发生了什么呢？继续深入分析一下。</p>
-<p>先用 strace 跟踪下系统调用看看：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# strace -u test_sudo sudo -u#-1 id</span><br></pre></td></tr></table></figure>
-<p>因为 strace -u 参数需要 root 身份才能使用，因此上面命令需要先切换到 root 帐号下，然后用 test_sudo 身份执行了 sudo -u#-1 id 命令。从输出的系统调用中，注意到：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">setresuid(-1, -1, -1) = 0</span><br></pre></td></tr></table></figure>
-<p>sudo 内部调用了 setresuid 来提升权限（虽然还调用了其他设置组之类的函数，但先不做分析），并且传入的参数都是 -1。</p>
-<p>因此，我们做一个简单的实验来调用 setresuid(-1, -1, -1) ，看看为什么执行后会是 root 身份，代码如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;#include &lt;sys/types.h&gt;#include &lt;unistd.h&gt;int main() &#123;</span><br><span class="line">  setresuid(-1, -1, -1);</span><br><span class="line">  setuid(0);</span><br><span class="line">  printf(&quot;EUID: %d, UID: %d\n&quot;, geteuid(), getuid());</span><br><span class="line">  return 0;&#125;</span><br></pre></td></tr></table></figure>
-<p>注意，需要将编译后的二进制文件所属用户改为 root，并加上 s 位，当设置了 s 位后，其他帐号执行时就会以文件所属帐号的身份运行。</p>
-<p>为了方便，我直接在 root 帐号下编译，并加 s 位：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost tmp] # gcc test.c</span><br><span class="line">[root@localhost tmp] # chmod +s a.out</span><br></pre></td></tr></table></figure>
-<p>然后以 test_sudo 帐号执行 a.out：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[test_sudo@localhost tmp] $ ./a.out</span><br><span class="line">EUID: 0, UID: 0</span><br></pre></td></tr></table></figure>
-<p>可见，运行后，当前身份变成了 root。</p>
-<p>其实 setresuid 函数只是系统调用 setresuid32 的简单封装，可以在 GLibc 的源码中看到它的实现：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">// 文件：sysdeps/unix/sysv/linux/i386/setresuid.c</span><br><span class="line">int</span><br><span class="line">__setresuid (uid_t ruid, uid_t euid, uid_t suid)</span><br><span class="line">&#123;</span><br><span class="line">  int result;</span><br><span class="line">  result = INLINE_SETXID_SYSCALL (setresuid32, 3, ruid, euid, suid);</span><br><span class="line">  return result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>setresuid32 最后调用的是内核函数 sys_setresuid，它的实现如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">// 文件：kernel/sys.c</span><br><span class="line">SYSCALL_DEFINE3(setresuid, uid_t, ruid, uid_t, euid, uid_t, suid)</span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  struct cred *new;</span><br><span class="line">  ...</span><br><span class="line">  kruid = make_kuid(ns, ruid);</span><br><span class="line">  keuid = make_kuid(ns, euid);</span><br><span class="line">  ksuid = make_kuid(ns, suid);</span><br><span class="line">  new = prepare_creds();</span><br><span class="line">  old = current_cred();</span><br><span class="line">  ...</span><br><span class="line">  if (ruid != (uid_t) -1) &#123;</span><br><span class="line">    new-&gt;uid = kruid;</span><br><span class="line">    if (!uid_eq(kruid, old-&gt;uid)) &#123;</span><br><span class="line">      retval = set_user(new);</span><br><span class="line">      if (retval &lt; 0)</span><br><span class="line">        goto error;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  if (euid != (uid_t) -1)</span><br><span class="line">    new-&gt;euid = keuid;</span><br><span class="line">  if (suid != (uid_t) -1)</span><br><span class="line">    new-&gt;suid = ksuid;</span><br><span class="line">  new-&gt;fsuid = new-&gt;euid;</span><br><span class="line">  ...</span><br><span class="line">  return commit_creds(new);</span><br><span class="line"> error:</span><br><span class="line">  abort_creds(new);</span><br><span class="line">  return retval;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>简单来说，内核在处理时，会调用 prepare_creds 函数创建一个新的凭证结构体，而传递给函数的 ruid、euid和suid 三个参数只有在不为 -1 的时候，才会将 ruid、euid 和 suid 赋值给新的凭证（见上面三个 if 逻辑），否则默认的 UID 就是 0。最后调用 commit_creds 使凭证生效。这就是为什么传递 -1 时，会拥有 root 权限的原因。</p>
-
-      
-
-      
-        <div class="page-reward">
-          <a href="javascript:;" target="_blank" rel="noopener" class="page-reward-btn tooltip-top">
-            <div class="tooltip tooltip-east">
-            <span class="tooltip-item">
-              赏
-            </span>
-            <span class="tooltip-content">
-              <span class="tooltip-text">
-                <span class="tooltip-inner">
-                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
-                  <div class="reward-box">
-                    
-                    
-                  </div>
-                </span>
-              </span>
-            </span>
-          </div>
-          </a>
-        </div>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
+        <div class="article-info info-on-right">
+          
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag article-tag-list-link color1">cve漏洞</a>
+        			<a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag article-tag-list-link color5">-0day安全 -metasploit -msf</a>
         		</li>
       		
 		</ul>
 	</div>
 
-      
+          
 
-      
-
-      
-        
-<div class="share-btn share-icons tooltip-left">
-  <div class="tooltip tooltip-east">
-    <span class="tooltip-item">
-      <a href="javascript:;" target="_blank" rel="noopener" class="share-sns share-outer">
-        <i class="icon icon-share"></i>
-      </a>
-    </span>
-    <span class="tooltip-content">
-      <div class="share-wrap">
-        <div class="share-icons">
-          <a class="weibo share-sns" href="javascript:;" target="_blank" rel="noopener" data-type="weibo">
-            <i class="icon icon-weibo"></i>
-          </a>
-          <a class="weixin share-sns wxFab" href="javascript:;" target="_blank" rel="noopener" data-type="weixin">
-            <i class="icon icon-weixin"></i>
-          </a>
-          <a class="qq share-sns" href="javascript:;" target="_blank" rel="noopener" data-type="qq">
-            <i class="icon icon-qq"></i>
-          </a>
-          <a class="douban share-sns" href="javascript:;" target="_blank" rel="noopener" data-type="douban">
-            <i class="icon icon-douban"></i>
-          </a>
-          <a class="qzone share-sns" href="javascript:;" target="_blank" rel="noopener" data-type="qzone">
-            <i class="icon icon-qzone"></i>
-          </a>
-          <a class="facebook share-sns" href="javascript:;" target="_blank" rel="noopener" data-type="facebook">
-            <i class="icon icon-facebook"></i>
-          </a>
-          <a class="twitter share-sns" href="javascript:;" target="_blank" rel="noopener" data-type="twitter">
-            <i class="icon icon-twitter"></i>
-          </a>
-          <a class="google share-sns" href="javascript:;" target="_blank" rel="noopener" data-type="google">
-            <i class="icon icon-google"></i>
-          </a>
         </div>
-      </div>
-    </span>
-  </div>
-</div>
-
-<div class="page-modal wx-share js-wx-box">
-    <a class="close js-modal-close" href="javascript:;" target="_blank" rel="noopener"><i class="icon icon-close"></i></a>
-    <p>扫一扫，分享到微信</p>
-    <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2019/11/12/cve-2019-14287/" alt="微信分享二维码">
-    </div>
-</div>
-
-<div class="mask js-mask"></div>
-      
-      <div class="clearfix"></div>
-    </div>
+        <div class="clearfix"></div>
+    </header>
   </div>
 </article>
-
-  
-<nav id="article-nav">
-  
-    <a href="/2019/11/13/cve-2014-6271/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          cve-2014-6271
-        
-      </div>
-    </a>
   
   
-    <a href="/2019/11/12/Eclipse+qemu%E8%B0%83%E8%AF%95ucore/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">Eclipse+qemu调试ucore</div>
-      <i class="icon-circle-right"></i>
-    </a>
-  
-</nav>
-
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" target="_blank" rel="noopener" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-        <div class="toc-container tooltip-left">
-            <i class="icon-font icon-category"></i>
-            <div class="tooltip tooltip-east">
-                <span class="tooltip-item">
-                </span>
-                <span class="tooltip-content">
-                    <div class="toc-article">
-                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#CVE-2019-14287-Linux-sudo漏洞分析及复现"><span class="toc-number">1.</span> <span class="toc-text">CVE-2019-14287(Linux sudo漏洞分析及复现)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-漏洞复现"><span class="toc-number">1.1.</span> <span class="toc-text">1.漏洞复现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-漏洞原理分析"><span class="toc-number">1.2.</span> <span class="toc-text">2.漏洞原理分析</span></a></li></ol></li></ol>
-                    </div>
-                </span>
-            </div>
-        </div>
-        
-    </div>
-</aside>
-
-
-
-  
-  
-  
-  <div id="cloud-tie-wrapper" class="cloud-tie-wrapper"></div>
-<script>
-  var cloudTieConfig = {
-    url: "http://yoursite.com/2019/11/12/cve-2019-14287/", 
-    sourceId: "cve-2019-14287",
-    productKey: "true",
-    target: "cloud-tie-wrapper"
-  };
-</script>
-<script src="//img1.cache.netease.com/f2e/tie/yun/sdk/loader.js"></script>
+    </div></section>
   
 
-  
-
-  
-
-  
+    
 
 
           </div>
@@ -421,9 +234,9 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: true,
+		isPost: false,
 		isArchive: false,
-		isTag: false,
+		isTag: true,
 		isCategory: false,
 		open_in_new: false,
 		toc_hide_index: true,
