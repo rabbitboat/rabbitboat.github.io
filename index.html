@@ -147,6 +147,113 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-0day安全--栈溢出" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/13/0day%E5%AE%89%E5%85%A8--%E6%A0%88%E6%BA%A2%E5%87%BA/">0day安全--栈溢出</a>
+    </h1>
+  
+
+        
+        
+<a href="/2019/11/13/0day%E5%AE%89%E5%85%A8--%E6%A0%88%E6%BA%A2%E5%87%BA/" class="archive-article-date">
+  	<time datetime="2019-11-13T00:33:44.348Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-11-13</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="0day安全–栈溢出利用的相关感悟"><a href="#0day安全–栈溢出利用的相关感悟" class="headerlink" title="0day安全–栈溢出利用的相关感悟"></a>0day安全–栈溢出利用的相关感悟</h1><blockquote>
+<p>引言：<br>其实缓冲区溢出的原理，个人认为总体来说道理相近，大缓冲区数据向小缓冲区复制的过程，由于没有注意到小缓冲区的边界，撑爆了较小的缓冲区，冲掉了和小缓冲区相邻内存区域的其他数据而引起的内存问题。利用缓冲区溢出漏洞可以修改内存中变量的值，甚至可以劫持进程、执行恶意代码、获得主机控制权，这种对内存区域的淹没与覆盖，可以利用，做各种花式操作</p>
+</blockquote>
+<blockquote>
+<p>但是我要说明的是，溢出漏洞远远不像想象中的那么简单，本次交流栈溢出的相关利用，以及shellcode的使用。</p>
+</blockquote>
+<h2 id="1-系统栈的工作原理"><a href="#1-系统栈的工作原理" class="headerlink" title="1.系统栈的工作原理"></a>1.系统栈的工作原理</h2><p>（1）进程使用的内存可以按照功能分成4个部分：<br>    （1）代码区：存储被装入执行的二进制代码<br>    （2）数据区：用于存储全局变量<br>    （3）堆区：进程可以在堆区 动态请求一定大小的内存，并在用完之后归还给堆区，动态分配和回收是堆区的特点。<br>    （4）栈区：用于动态的存储函数之间的调用关系，以保证被调用函数在返回时恢复到母函数中继续执行。<br>（2）函数调用时的过程：调用到函数时，压入栈帧、返回地址、局部变量、新函数的栈帧，要返回时，只需要弹出自己的栈帧并获得返回地址，之后调回原函数代码区继续执行。（在实际运行过程中，main函数并不是第一个调用的函数，程序被装入内存前还有其他操作）</p>
+<p>一定要注意调用函数压栈顺序，比如局部变量作为一个参数压入栈，这时候，敏感的同学应该就能意识到，这种方式就很有可能造成栈溢出。<br>（3)寄存器与函数栈帧：ESP、EBP：EBP标识当前栈帧的底部、ESP标识当前栈帧的顶部<br>函数栈帧中，包含的信息：<br>    （1）局部变量：为函数局部变量开辟的内存空间<br>    （2）栈帧状态值：保存前栈帧的顶部和底部（实际上只保存前栈帧的底部，前栈帧的顶部可以通过堆栈平衡计算），用于在本帧被弹出后恢复上一个栈帧。<br>    （3）函数返回地址：存放函数调用前的指令位置，以便函数返回是能够恢复到函数被调用前的代码区执行指令</p>
+<p>(4)函数调用大致包括：参数入栈–返回地址入栈–代码区跳转–栈帧调整（包括：保存当前栈帧状态值–EBP入栈、将当前栈帧切换到新栈帧–将ESP值装入EBP，更新栈帧底部、给新栈帧分配空间–把ESP减去所需空间的大小，抬高栈顶）<br>函数返回大致包括：保存返回值（通常将返回值放入EAX中）–弹出当前栈帧、恢复上一个栈帧（包括：在堆栈平衡的基础上，给ESP加上栈帧的大小，降低栈顶，回收当前栈帧的空间–将当前栈帧底部保存的前栈帧EBP值弹入EBP寄存器，恢复出上一个栈帧–将函数返回地址弹给EIP寄存器）–跳转（按照函数返回值调回母函数继续执行）</p>
+<h2 id="2-修改邻接变量"><a href="#2-修改邻接变量" class="headerlink" title="2.修改邻接变量"></a>2.修改邻接变量</h2><p>就如同刚刚所讲的，函数局部变量在栈中一个接一个排列，假如局部变量有类似数组之类的缓冲区，并且存在数组越界的缺陷，那么越界的数组元素就有可能破坏栈中相邻变量的值，甚至可以破坏栈中所保存的EBP的值、返回地址等重要数据。</p>
+<p>示例如下图：<br><img src="https://github.com/rabbitboat/IMG/raw/master/image/0day--%E6%A0%88%E6%BA%A2%E5%87%BA_files/%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E7%9A%84%E5%AE%9E%E7%8E%B0.png" alt="show1"></p>
+<p>给出下面的代码实例，下段代码会实现栈溢出<br><img src="https://github.com/rabbitboat/IMG/raw/master/image/0day--%E6%A0%88%E6%BA%A2%E5%87%BA_files/%E6%A0%88%E6%BA%A2%E5%87%BA.png" alt="show1"></p>
+<p>利用溢出的知识，继续向后进行覆盖，从而达到替换返回地址区域数据的目的，从而可以修改函数的返回地址。栈溢出不仅可以通过手工输入去实现，还可以通过读取txt文件来实现栈溢出  </p>
+<p>下段代码为示例：<br><img src="https://github.com/rabbitboat/IMG/raw/master/image/0day--%E6%A0%88%E6%BA%A2%E5%87%BA_files/QQ%E6%88%AA%E5%9B%BE20191103223547.png" alt="show1"></p>
+<p>当然，利用修改返回地址的方法，我们又可以利用，向目标进程中植入代码，我们可以将返回地址指向我们想执行的代码位置，之后将缓冲区填充为我们想要执行的代码。</p>
+<p>上述讲的几个利用方式，利用栈溢出的四个利用思路其实本身很好想，但是实现起来难度大，主要是需要看源码，看对栈溢出的敏感度，尤其是strcmp这种强行的赋值指令，很危险。</p>
+<p>还有一个疑惑，为什么要把代码放到栈内的空间，而不直接加载到代码段内的空间呢？个人认为是因为代码段内的空间具有未知性，而栈空间是可控的，不要如果把返回地址定位到栈空间段（虽然不是代码段），但是CPU还是会取指向下执行，如果发现不是可执行代码，则会报错</p>
+<p>下面的图将解答我们的疑惑：<br><img src="https://github.com/rabbitboat/IMG/raw/master/image/0day--%E6%A0%88%E6%BA%A2%E5%87%BA_files/%E6%8A%A5%E9%94%99.png" alt="show1"></p>
+<p>这个图虽然是为了第三章铺垫，但是深刻地解答出了我心中的疑惑</p>
+<h2 id="3-开发shellcode"><a href="#3-开发shellcode" class="headerlink" title="3.开发shellcode"></a>3.开发shellcode</h2><blockquote>
+<p>shellcode：通称缓冲区溢出攻击中植入进程的代码<br>exploit：制作出一个具有攻击效果的“承载”着shellcode的输入字符串，用于生成攻击性的网络数据包或者其它形式的攻击性输入。核心就是淹没返回地址，劫持进程控制权，之后跳转去执行shellcode</p>
+</blockquote>
+<p>其实如果把shellcode和exploit比作导弹，exploit为承载弹头的东西，shellcode为弹头本身（我们需要执行的代码）</p>
+<p>在Metasploit中，受害主机会被当作一个叫target的选项进行配置，而shellcode也有更形象的名字：payload（更加形象了吧）</p>
+<p>但是在我们平日利用时，尤其是2中所介绍的，我们要查出shellcode的起始地址，但实际调试漏洞中，会发现栈中地址是动态变化的，因此要写出通用的shellcode就必须使程序能够自动定位到shellcode的起始地址。</p>
+<p>用jmp esp作为跳板，不论栈帧怎么移位，都能精确地跳回栈区。<br>（1）用任意一个jmp esp指令的地址覆盖函数返回地址<br>（2）函数返回后被重定向去执行jmp esp指令<br>（3）由于esp在函数返回后仍指向栈区，jmp esp指令执行后，处理器会到栈区函数返回地址之后的地方取指令执行<br>（4）重新布置shellcode，在淹没函数返回地址后，继续淹没一片栈空间，将shellcode恰好摆在函数返回地址后，jmp esp指令执行后，会恰好跳进shellcode</p>
+<p>shellcode还有一些处理方式：</p>
+<p>1.抬高栈顶保护shellcode</p>
+<p>示例如图：<br><img src="https://github.com/rabbitboat/IMG/raw/master/image/0day-%E5%BC%80%E5%8F%91shellcode_files/%E4%BF%9D%E6%8A%A4shellcode.png" alt="show1"></p>
+<p>2.填充nop，只要jmp sp能够落入nop中，就可以一直向下执行，直到找到真正的shellcode（我姑且称这种处理方式为nop淹没法）</p>
+<blockquote>
+<p>编写shellcode，还需要的就是如何找到jmp esp这条指令的地址，我们最好要找到一个不同程序加载后，这个地址都不变的情况，因此我们要利用windows编程每次都会导入的动态链接库（比如kernel32.dll），具体的例子可以自己去调试或者尝试。</p>
+</blockquote>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag article-tag-list-link color1">0day安全 栈溢出</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2019/11/13/0day%E5%AE%89%E5%85%A8--%E6%A0%88%E6%BA%A2%E5%87%BA/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" target="_blank" rel="noopener" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-cve-2014-6271" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -708,15 +815,19 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color1">0day安全 栈溢出</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color3">计网</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color1">cve漏洞</a>
+                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color5">操作系统</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color5">操作系统</a>
+                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color1">cve漏洞</a>
               </li>
              
               <li class="article-tag-list-item">
