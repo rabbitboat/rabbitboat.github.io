@@ -173,11 +173,31 @@
 </blockquote>
 <h1 id="0day安全3—堆溢出的利用"><a href="#0day安全3—堆溢出的利用" class="headerlink" title="0day安全3—堆溢出的利用"></a>0day安全3—堆溢出的利用</h1><h2 id="1-堆的工作原理"><a href="#1-堆的工作原理" class="headerlink" title="1.堆的工作原理"></a>1.堆的工作原理</h2><p>一、相关历史：<br>其实微软没有公开操作系统中堆管理的系统，有很多研究Windows的大佬，对堆有众多的深刻研究，在此不给大家列举，从《0day安全》书上直接CV一段大佬们的研究成果：<br>（1）Halvar Flake：2002 年的 black hat 上，他在演讲“Third Generation Exploitation”中首次挑战 Windows 的堆溢出，并揭秘了堆中一些重要的数据结构和算法。<br>（2）David Li tchfield：David 应该是安全技术界的传奇人物。除了他曾经发现的那些被横扫世界的蠕虫所利用的 0day漏洞外，他还是著名的安全咨询公司NGS(Next Generation Security)的创始人。David 在 2004 年 black hat 上演讲的“Windows Heap Overflows”首次比较全面地介绍了 Windows 2000 平台下堆溢出的技术细节，包括了重要数据结构、堆分配算法、利用思路、劫持进程的方法、执行 shellcode 时会遇到的问题等。那次演讲的白皮书（White paper）几乎是所有研究 Windows 堆溢出人员的必读文献。<br>（3）Matt Conover：其演讲的“XP SP2 Heap Exploitation”中除了全面揭示了 Windows 堆中与溢出相关的所有数据结构和分配策略之外，最重要的是，他还提出了突破 Windows XP SP2平台下重重安全机制的防护进行堆溢出的方法。   </p>
 <p>微软操作系统堆管理机制发展大致为三个阶段：<br>（1）Windows 2000～Windows XP SP1：堆管理系统只考虑了完成分配任务和性能因素，丝<br>毫没有考虑安全因素，可以比较容易发被攻击者利用。<br>（2）Windows XP 2～Windows 2003：加入了安全因素，比如修改了块首的格式并加入安全<br>cookie，双向链表结点在删除时会做指针验证等。这些安全防护措施使堆溢出攻击变得非常困难，但利用一些高级的攻击技术在一定情况下还是有可能利用成功。<br>（3）Windows Vista～Windows 7：不论在堆分配效率上还是安全与稳定性上，都是堆管理算法的一个里程碑。   </p>
-<p>二、堆栈区别：<br>堆具备的特性如下：<br>（1）堆是一种在程序运行时动态分配的内存。所谓动态是指所需内存的大小在程序设计时<br>不能预先决定，需要在程序运行时参考用户的反馈。<br>（2）堆在使用时需要程序员用专用函数进行申请，如 C 语言中的 malloc 等函数、C++中的new 函数等都是最常见的分配堆内存的函数。堆内存申请有可能成功，也有可能失败，这与申请内存的大小、机器性能和当前运行环境有关。<br>（3）一般用一个堆指针来使用申请得到的内存，读、写、释放都通过这个指针来完成。<br>（4）使用完毕后需要把堆指针传给堆释放函数回收这片内存，否则会造成内存泄露。典型<br>的释放函数包括 free、delete 等。<br>下图是堆内存与栈内存的比较：<br><img src="" alt="image1"></p>
-<p>三、堆结构与管理：<br>使用堆大致可分为三步：申请内存—使用内存—释放内存<br>使用堆需要克服的问题：1.杂乱（大片空闲内存可能出现碎片）<br>                    2.辨别（程序要识别出来哪些内存区域被占用，哪些内存区域空闲）<br>                    3.恰当（经济地分配空闲内存块）<br>两种重要的堆表：空表（freelist）、快表（lookaside）<br>（1）空表：<br><img src="" alt="image2"><br>（2）快表：<br><img src="" alt="image3"><br>主要介绍一下快表，之所以叫快表是因为不会出现堆块合并，并且每条快表最多4个结点，很快会填满<br>堆中的操作可以分为：堆块分配、堆块释放、堆块合并<br>（1）堆块分配：可以分为三类，快表分配、普通空表分配、零号空表分配<br>快表分配：寻找大小匹配的空闲块即可，修改状态，从表中卸下，最后把指向其的指针给程序<br>普通空表分配：找最优的空闲块，找不到就找次优……<br>零号空表分配（零号空表块大小是升序排列的）：先反向查找最后一个最大的，如果满足要求就正向搜索，找到最优块<br>注意，空表分配时存在找零钱现象，就是找不到最优的块，会从较大的块中割出来一块进行分配，剩下的部分会重新链入表，快表只有在精确匹配时才会分配，没有找钱现象<br>（2）堆块释放<br>将堆块改为空闲—插入堆表<br>（3）堆块合并<br>注意，堆块合并只能合并两个相邻的空闲堆块<br>将两个块从链表中卸下—合并堆块—调整块首信息—将块重新插入链表<br>内存块分为三类：小块：SIZE&lt;1KB  大块：1KB&lt;=SIZE&lt;=512KB  巨块：SIZE&gt;=512KB<br>内存紧缩示意图如下：<br><img src="" alt="image4"><br>对应着三种内存块，分配和释放算法也不相同：<br><img src="" alt="image5"><br>Windows堆管理的几个要点：<br>（1）快表中的空闲块被设置为占用态，不会发生堆块合并操作<br>（2）快表只有精确匹配时才会分配，没有次优解和找零钱<br>（3）快表是单链表，操作比双链表简单<br>（4）因此快表速度非常快，分配释放的时候总会优先使用快表，失败时才用空表<br>（5）因为快表只有4项，因此很容易满，因此空表也经常使用  </p>
-<h2 id="2-堆的再深入"><a href="#2-堆的再深入" class="headerlink" title="2.堆的再深入"></a>2.堆的再深入</h2><p>一、堆分配函数的调用关系<br>下图是Windows平台下的堆管理架构：<br><img src="" alt="image6"><br>所有的堆分配函数都将使用位于ntdll.dll中的RtlAllocateHeap()函数进行分配，下图是Windows中堆分配API调用关系：<br><img src="" alt="image7"></p>
-<p>二、堆的调试<br>堆的调试和栈的调试不同，如果用调试器调试堆，堆管理函数会检测到进程处于调试态，而调用调试态的堆管理策略。<br>调式态堆管理策略和常态堆管理策略的不同：<br>（1）调试堆不使用块表，只用空表分配<br>（2）所有堆块都被加上多余的16字节尾部防止溢出<br>（3）块首的标志位不同<br>为了避免程序检测出调试器而使用调试堆管理策略，我们可以创建堆之后加入一个人工断点：_asm int3，然后让程序单独运行，当堆初始化后，断点中断程序，再利用调试器，看到真正的堆<br>人工中断程序如下：<br><img src="" alt="image8"><br>点击取消，就可以打开电脑的默认调试器进行调试，我们把默认的电脑调试器设置为OD，方法如下：打开OD–设置–实时调试设置–设置OD为实时调试器<br>所有的堆块分配函数都需要指明堆区的句柄，然后在堆区内进行堆表修改等操作，最后完成分配工作（malloc虽然我们平日使用时，没有明确指出分配到哪个堆区，但是逆向malloc可以发现，使用时其已经调用了HeapCreate()函数为自己创建了堆区）<br>通常情况，进程会存在若干个堆区。其中包括开始于0x00130000的大小为0x4000的进程堆，可以通过GetProcessHeap()函数获得这个堆的句柄并使用；另外，我们熟悉的内存分配函数malloc()也有自己的堆区，大多数情况下，这是一个紧跟着PE镜像处0x00430000的大小为0x8000字节的堆，单击M按钮，可以得到当前的内存映射状态。  </p>
-<p>三、识别堆表<br>当HeapCreate()成功创建了堆区后，会把整个堆区的起始地址返回给EAX<br>可以利用插件heap_vis，查看堆块，但heap_vis存在不稳定的问题，并且不能区分空表和快表，因此建议直接参照数据结构来观察内存<br>从堆区的起始地址开始，堆表中包含的信息依次是：段表索引–虚表索引–空表使用标识–空表索引区</p>
+<p>二、堆栈区别：<br>堆具备的特性如下：<br>（1）堆是一种在程序运行时动态分配的内存。所谓动态是指所需内存的大小在程序设计时<br>不能预先决定，需要在程序运行时参考用户的反馈。<br>（2）堆在使用时需要程序员用专用函数进行申请，如 C 语言中的 malloc 等函数、C++中的new 函数等都是最常见的分配堆内存的函数。堆内存申请有可能成功，也有可能失败，这与申请内存的大小、机器性能和当前运行环境有关。<br>（3）一般用一个堆指针来使用申请得到的内存，读、写、释放都通过这个指针来完成。<br>（4）使用完毕后需要把堆指针传给堆释放函数回收这片内存，否则会造成内存泄露。典型<br>的释放函数包括 free、delete 等。<br>下图是堆内存与栈内存的比较：<br><img src="https://github.com/rabbitboat/IMG/raw/master/image/0day%E5%AE%89%E5%85%A83--%E5%A0%86%E6%BA%A2%E5%87%BA%E7%9A%84%E5%88%A9%E7%94%A8/%E5%A0%86%E5%86%85%E5%AD%98%E4%B8%8E%E6%A0%88%E5%86%85%E5%AD%98%E7%9A%84%E6%AF%94%E8%BE%83.png" alt="image1"></p>
+<p>三、堆结构与管理：<br>使用堆大致可分为三步：申请内存—使用内存—释放内存<br>使用堆需要克服的问题：1.杂乱（大片空闲内存可能出现碎片）<br>                    2.辨别（程序要识别出来哪些内存区域被占用，哪些内存区域空闲）<br>                    3.恰当（经济地分配空闲内存块）<br>两种重要的堆表：空表（freelist）、快表（lookaside）<br>（1）空表：<br><img src="https://github.com/rabbitboat/IMG/raw/master/image/0day%E5%AE%89%E5%85%A83--%E5%A0%86%E6%BA%A2%E5%87%BA%E7%9A%84%E5%88%A9%E7%94%A8/%E7%A9%BA%E8%A1%A8%E7%BB%93%E6%9E%84.png" alt="image2"><br>（2）快表：<br><img src="https://github.com/rabbitboat/IMG/raw/master/image/0day%E5%AE%89%E5%85%A83--%E5%A0%86%E6%BA%A2%E5%87%BA%E7%9A%84%E5%88%A9%E7%94%A8/%E5%BF%AB%E8%A1%A8%E7%BB%93%E6%9E%84.png" alt="image3"><br>主要介绍一下快表，之所以叫快表是因为不会出现堆块合并，并且每条快表最多4个结点，很快会填满<br>堆中的操作可以分为：堆块分配、堆块释放、堆块合并<br>（1）堆块分配：可以分为三类，快表分配、普通空表分配、零号空表分配<br>快表分配：寻找大小匹配的空闲块即可，修改状态，从表中卸下，最后把指向其的指针给程序<br>普通空表分配：找最优的空闲块，找不到就找次优……<br>零号空表分配（零号空表块大小是升序排列的）：先反向查找最后一个最大的，如果满足要求就正向搜索，找到最优块<br>注意，空表分配时存在找零钱现象，就是找不到最优的块，会从较大的块中割出来一块进行分配，剩下的部分会重新链入表，快表只有在精确匹配时才会分配，没有找钱现象<br>（2）堆块释放<br>将堆块改为空闲—插入堆表<br>（3）堆块合并<br>注意，堆块合并只能合并两个相邻的空闲堆块<br>将两个块从链表中卸下—合并堆块—调整块首信息—将块重新插入链表<br>内存块分为三类：小块：SIZE&lt;1KB  大块：1KB&lt;=SIZE&lt;=512KB  巨块：SIZE&gt;=512KB<br>内存紧缩示意图如下：<br><img src="https://github.com/rabbitboat/IMG/raw/master/image/0day%E5%AE%89%E5%85%A83--%E5%A0%86%E6%BA%A2%E5%87%BA%E7%9A%84%E5%88%A9%E7%94%A8/%E5%86%85%E5%AD%98%E7%B4%A7%E7%BC%A9%E7%A4%BA%E6%84%8F%E5%9B%BE.png" alt="image4"><br>对应着三种内存块，分配和释放算法也不相同：<br><img src="https://github.com/rabbitboat/IMG/raw/master/image/0day%E5%AE%89%E5%85%A83--%E5%A0%86%E6%BA%A2%E5%87%BA%E7%9A%84%E5%88%A9%E7%94%A8/%E4%B8%8D%E5%90%8C%E5%9D%97%E5%88%86%E9%85%8D%E5%92%8C%E9%87%8A%E6%94%BE%E7%AE%97%E6%B3%95.png" alt="image5"><br>Windows堆管理的几个要点：<br>（1）快表中的空闲块被设置为占用态，不会发生堆块合并操作<br>（2）快表只有精确匹配时才会分配，没有次优解和找零钱<br>（3）快表是单链表，操作比双链表简单<br>（4）因此快表速度非常快，分配释放的时候总会优先使用快表，失败时才用空表<br>（5）因为快表只有4项，因此很容易满，因此空表也经常使用  </p>
+<h2 id="2-堆的再深入"><a href="#2-堆的再深入" class="headerlink" title="2.堆的再深入"></a>2.堆的再深入</h2><p>一、堆分配函数的调用关系<br>下图是Windows平台下的堆管理架构：<br><img src="https://github.com/rabbitboat/IMG/raw/master/image/0day%E5%AE%89%E5%85%A83--%E5%A0%86%E6%BA%A2%E5%87%BA%E7%9A%84%E5%88%A9%E7%94%A8/%E5%A0%86%E5%88%86%E9%85%8D%E4%BD%93%E7%B3%BB.png" alt="image6"><br>所有的堆分配函数都将使用位于ntdll.dll中的RtlAllocateHeap()函数进行分配，下图是Windows中堆分配API调用关系：<br><img src="https://github.com/rabbitboat/IMG/raw/master/image/0day%E5%AE%89%E5%85%A83--%E5%A0%86%E6%BA%A2%E5%87%BA%E7%9A%84%E5%88%A9%E7%94%A8/%E5%A0%86%E5%88%86%E9%85%8DAPI%E8%B0%83%E7%94%A8%E5%85%B3%E7%B3%BB.png" alt="image7"></p>
+<p>二、堆的调试<br>堆的调试和栈的调试不同，如果用调试器调试堆，堆管理函数会检测到进程处于调试态，而调用调试态的堆管理策略。<br>调式态堆管理策略和常态堆管理策略的不同：<br>（1）调试堆不使用块表，只用空表分配<br>（2）所有堆块都被加上多余的16字节尾部防止溢出<br>（3）块首的标志位不同<br>为了避免程序检测出调试器而使用调试堆管理策略，我们可以创建堆之后加入一个人工断点：_asm int3，然后让程序单独运行，当堆初始化后，断点中断程序，再利用调试器，看到真正的堆<br>人工中断程序如下：<br><img src="https://github.com/rabbitboat/IMG/raw/master/image/0day%E5%AE%89%E5%85%A83--%E5%A0%86%E6%BA%A2%E5%87%BA%E7%9A%84%E5%88%A9%E7%94%A8/%E4%BA%BA%E5%B7%A5%E8%AE%BE%E7%BD%AE%E4%B8%AD%E6%96%AD.png" alt="image8"><br>点击取消，就可以打开电脑的默认调试器进行调试，我们把默认的电脑调试器设置为OD，方法如下：打开OD–设置–实时调试设置–设置OD为实时调试器<br>所有的堆块分配函数都需要指明堆区的句柄，然后在堆区内进行堆表修改等操作，最后完成分配工作（malloc虽然我们平日使用时，没有明确指出分配到哪个堆区，但是逆向malloc可以发现，使用时其已经调用了HeapCreate()函数为自己创建了堆区）<br>通常情况，进程会存在若干个堆区。其中包括开始于0x00130000的大小为0x4000的进程堆，可以通过GetProcessHeap()函数获得这个堆的句柄并使用；另外，我们熟悉的内存分配函数malloc()也有自己的堆区，大多数情况下，这是一个紧跟着PE镜像处0x00430000的大小为0x8000字节的堆，单击M按钮，可以得到当前的内存映射状态。  </p>
+<p>三、识别堆表<br>当HeapCreate()成功创建了堆区后，会把整个堆区的起始地址返回给EAX<br>可以利用插件heap_vis，查看堆块，但heap_vis存在不稳定的问题，并且不能区分空表和快表，因此建议直接参照数据结构来观察内存<br>从堆区的起始地址开始，堆表中包含的信息依次是：段表索引–虚表索引–空表使用标识–空表索引区<br>其实对于堆溢出来说，需要关注的是空表索引区，当一个堆刚刚被初始化时，其堆块状况非常简单：<br>（1）只有一个空闲态的大块，被称作尾块<br>（2）Freelist[0]指向“尾块”<br>（3）除了零号空表索引外，其余各项索引都指向自己，意味着所有的空闲链表中都没有空闲块<br>注：我认为一定不要和真实的堆块弄混，注意索引和真实堆块的区别，我们现在讨论的只是索引。<br>下图是占用态堆块的结构：<br><img src="https://github.com/rabbitboat/IMG/raw/master/image/0day%E5%AE%89%E5%85%A83--%E5%A0%86%E6%BA%A2%E5%87%BA%E7%9A%84%E5%88%A9%E7%94%A8/%E5%8D%A0%E7%94%A8%E6%80%81%E5%A0%86%E5%9D%97.png" alt="image9"><br>下图是空闲态堆块的结构(其和占用态基本相同，只是将块首后数据区的前八个字节用于存放空表指针)：<br><img src="https://github.com/rabbitboat/IMG/raw/master/image/0day%E5%AE%89%E5%85%A83--%E5%A0%86%E6%BA%A2%E5%87%BA%E7%9A%84%E5%88%A9%E7%94%A8/%E7%A9%BA%E9%97%B2%E6%80%81%E5%A0%86%E5%9D%97%E7%BB%93%E6%9E%84.png" alt="image10"></p>
+<p>四、堆块的分配：<br>（1）堆块的大小包括了块首在内，即如果请求 32 字节，实际会分配的堆块为 40 字节：8字节块首＋32 字节块身。<br>（2）堆块的单位是 8 字节，不足 8 字节的部分按 8 字节分配。<br>（3）初始状态下，快表和空表都为空，不存在精确分配。请求将使用“次优块”进行分配。这个“次优块”就是位于某个偏移的尾块（从空表索引中的第一个指针指向尾块的位置）。<br>（4）由于次优分配的发生，分配函数会陆续从尾块中切走一些小块，并修改尾块块首中的<br>size 信息，最后把 freelist[0]指向新的尾块位置。</p>
+<p>五、堆块释放  </p>
+<p>六、堆块合并：<br>堆块合并可以更加有效地利用内存，但往往需要修改多处指针，也是一个费时的工作。因此，堆块合并只发生在空表中。在强调分配效率的快表中，堆块合并一般会被禁止（通过设置堆块为占用态）。另外，空表中的第一个块不会向前合并，最后一个块不会向后合并。</p>
+<p>七、快表的使用：</p>
+<h2 id="3-堆溢出的利用（上）—DWORD-SHOOT"><a href="#3-堆溢出的利用（上）—DWORD-SHOOT" class="headerlink" title="3.堆溢出的利用（上）—DWORD SHOOT"></a>3.堆溢出的利用（上）—DWORD SHOOT</h2><p>一、链表拆卸中的问题：  </p>
+<blockquote>
+<p>其实个人认为，堆管理系统的操作，就涉及到对链表的修改，其实我认为也就是对链表中结点的修改，其实也就是卸下和链入堆块，如果能伪造链表结点的指针，那么卸下和链入过程中就有可能获得读写内存的机会。<br>堆溢出利用的精髓就是用构造的数据，溢出下一个堆块的块首，改写块首中的前向指针和后向指针，然后在堆块分配、释放、合并等操作发生时获得向内存写入数据的机会。我们将这种能够向内存任意位置写入任意数据的机会称为“DWORD SHOOT”</p>
+</blockquote>
+<p>在平日数据结构的学习中我们可以知道，当卸下双向链表的一个结点时，执行的操作为： </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">int remove (ListNode * node) </span><br><span class="line">&#123; </span><br><span class="line">    node -&gt; blink -&gt; flink = node -&gt; flink; </span><br><span class="line">    node -&gt; flink -&gt; blink = node -&gt; blink; </span><br><span class="line">    return 0; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>因此，如果利用堆溢出，我们可以控制堆块的块首，改变其前向指针和后向指针，从而达到目的.原理如下图：<br><img src="https://github.com/rabbitboat/IMG/raw/master/image/0day%E5%AE%89%E5%85%A83--%E5%A0%86%E6%BA%A2%E5%87%BA%E7%9A%84%E5%88%A9%E7%94%A8/DWORD%20SHOOT%E5%8E%9F%E7%90%86.png" alt="image11">   </p>
+<p>下面是一个简单的堆调试程序：  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;windows.h&gt; </span><br><span class="line">main() </span><br><span class="line">&#123; </span><br><span class="line">    HLOCAL h1, h2,h3,h4,h5,h6; </span><br><span class="line">    HANDLE hp; </span><br><span class="line">    hp = HeapCreate(0,0x1000,0x10000); </span><br><span class="line">    h1 = HeapAlloc(hp,HEAP_ZERO_MEMORY,8); </span><br><span class="line">    h2 = HeapAlloc(hp,HEAP_ZERO_MEMORY,8); </span><br><span class="line">    h3 = HeapAlloc(hp,HEAP_ZERO_MEMORY,8); </span><br><span class="line">    h4 = HeapAlloc(hp,HEAP_ZERO_MEMORY,8); </span><br><span class="line">    h5 = HeapAlloc(hp,HEAP_ZERO_MEMORY,8); </span><br><span class="line">    h6 = HeapAlloc(hp,HEAP_ZERO_MEMORY,8); </span><br><span class="line">    _asm int 3//used to break the process </span><br><span class="line">    //free the odd blocks to prevent coalesing </span><br><span class="line">    HeapFree(hp,0,h1); </span><br><span class="line">    HeapFree(hp,0,h3); </span><br><span class="line">    HeapFree(hp,0,h5); //now freelist[2] got 3 entries </span><br><span class="line">    //will allocate from freelist[2] which means unlink the last entry </span><br><span class="line">    //(h5) </span><br><span class="line">    h1 = HeapAlloc(hp,HEAP_ZERO_MEMORY,8); </span><br><span class="line">    return 0; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在这段程序中应该注意：<br>（1）程序首先创建了一个大小为 0x1000 的堆区，并从其中连续申请了 6 个大小为 8 字节的堆块（加上块首实际上是 16 字节），这应该是从初始的大块中“切”下来的。<br>（2）释放奇数次申请的堆块是为了防止堆块合并的发生。<br>（3）三次释放结束后，freelist[2]所标识的空表中应该链入了 3 个空闲堆块，它们依次是 h1、h3、h5。<br>（4）再次申请 8 字节的堆块，应该从 freelist[2]所标识的空表中分配，这意味着最后一个堆块 h5 被从空表中“拆下”。<br>（5）如果我们手动修改 h5 块首中的指针，应该能够观察到 DWORD SHOOT 的发生。<br>可以在OD中手动修改指针，从而调试运行。</p>
+<h2 id="4-堆溢出的利用（下）—代码植入"><a href="#4-堆溢出的利用（下）—代码植入" class="headerlink" title="4.堆溢出的利用（下）—代码植入"></a>4.堆溢出的利用（下）—代码植入</h2><p>一、DWORD SHOOT的利用方法<br>DWORD SHOOT利用方式有很多：内存变量、代码逻辑、函数返回地址、攻击异常处理机制、函数指针、PEB中线程同步函数的入口地址<br>二、狙击PEB中RtlEnterCritical-Section()的函数指针<br>在windows下，当一个进程退出时，ExitProcess()函数要做很多工作，必然用到临界区函数RtlEnterCriticalSection()和RtlLeaveCriticalSection()来同步线程防止脏数据的产生。微软的工程师对ExitProcess()情有独钟，因为其调用临界区函数的方法独特，是通过PEB中偏移0x20处存放的函数指针来间接完成的。准确来说是在0x7FFDF020存放指向RtlEnterCriticalSection()的指针，在0x7FFDF024存放指向RtlLeaveCriticalSection()的指针。<br>这里以0x7FFDF024的RtlEnterCriticalSection()指针为目标，联系DWORD SHOOT，劫持进程、植入代码的动作，实验代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;windows.h&gt; </span><br><span class="line">char shellcode[]=&quot;\x90\x90\x90\x90\x90\x90\x90\x90……&quot; </span><br><span class="line">main() </span><br><span class="line">&#123; </span><br><span class="line">    HLOCAL h1 = 0, h2 = 0; </span><br><span class="line">    HANDLE hp; </span><br><span class="line">    hp = HeapCreate(0,0x1000,0x10000); </span><br><span class="line">    h1 = HeapAlloc(hp,HEAP_ZERO_MEMORY,200); </span><br><span class="line">    __asm int 3 //used to break process </span><br><span class="line">    memcpy(h1,shellcode,0x200); //overflow,0x200=512 </span><br><span class="line">    h2 = HeapAlloc(hp,HEAP_ZERO_MEMORY,8); </span><br><span class="line">    return 0; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>（1）h1 向堆中申请了 200 字节的空间。<br>（2）memcpy 的上限错误地写成了 0x200，这实际上是 512 字节，所以会产生溢出。<br>（3）h1 分配完之后，后边紧接着的是一个大空闲块（尾块）。<br>（4）超过 200 字节的数据将覆盖尾块的块首。<br>（5）用伪造的指针覆盖尾块块首中的空表指针，当 h2 分配时，将导致 DWORD SHOOT。<br>（6）DWORD SHOOT 的目标是 0x7FFDF020 处的 RtlEnterCriticalSection()函数指针，可以简单地将其直接修改为 shellcode 的位置。<br>（7）DWORD SHOOT 完毕后，堆溢出导致异常，最终将调用 ExitProcess()结束进程。<br>（8）ExitProcess()在结束进程时需要调用临界区函数来同步线程，但却从 P.E.B 中拿出了指向 shellcode 的指针，因此 shellcode 被执行。<br>注意在shellcode中，我们要先对指针的地址进行修复，因为如果不修复，执行完shellcode，执行exitprocess()时，又会调用shellcode地址，这样进程不能正常完成，因此要先对该地址的内容进行修复。<br>三、堆溢出利用的注意事项：<br>1.注意调试堆和常态堆<br>2.要在shellcode中对环境进行修复，通常，比较简单的修复堆区的方法有以下一些步骤：<br>（1）在堆区偏移 0x28 的地方存放着堆区所有空闲块的总和 TotalFreeSize。<br>（2）把一个较大块（或干脆直接找个暂时不用的区域伪造一个块首）块首中标识自身大小<br>的两个字节（self size）修改成堆区空闲块总容量的大小（TotalFreeSize）。<br>（3）把该块的 flag 位设置为 0x10（last entry 尾块）。<br>（4）把 freelist[0]的前向指针和后向指针都指向这个堆块。<br>3.定位shellcode的跳板<br>4.注意指针反射现象，在第二次调整指针的时候，注意前指针指向的地址，防止出现问题。</p>
+<blockquote>
+<p>其实对于堆溢出的利用还有很多很多地方没有讲到，上述的溢出利用执行shellcode只是堆溢出的某一方面，希望在今后的学习中，可以进一步的学习和完善。</p>
+</blockquote>
 
       
 
@@ -1042,7 +1062,31 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color1">0day安全 栈溢出</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color2">0day安全</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color4">堆溢出</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color5">操作系统</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color3">计网</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color1">cve漏洞</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color1">兔兔和小船</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1059,30 +1103,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color3">Exploit</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color4">堆溢出</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color1">0day安全 栈溢出</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color3">计网</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color1">cve漏洞</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color1">兔兔和小船</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color5">操作系统</a>
               </li>
             
             <div class="clearfix"></div>
