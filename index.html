@@ -147,6 +147,109 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-0day安全4--各种内存攻击技术" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/23/0day%E5%AE%89%E5%85%A84--%E5%90%84%E7%A7%8D%E5%86%85%E5%AD%98%E6%94%BB%E5%87%BB%E6%8A%80%E6%9C%AF/">0day安全4--各种内存攻击技术</a>
+    </h1>
+  
+
+        
+        
+<a href="/2019/11/23/0day%E5%AE%89%E5%85%A84--%E5%90%84%E7%A7%8D%E5%86%85%E5%AD%98%E6%94%BB%E5%87%BB%E6%8A%80%E6%9C%AF/" class="archive-article-date">
+  	<time datetime="2019-11-23T15:36:12.428Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-11-23</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="0day安全4–各种内存攻击技术"><a href="#0day安全4–各种内存攻击技术" class="headerlink" title="0day安全4–各种内存攻击技术"></a>0day安全4–各种内存攻击技术</h1><blockquote>
+<p>其实漏洞技术利用不过是溢出、跳转、指令、指针……但是各种大佬们把这种漏洞技术利用的炉火纯青，添加各种艺术气息。</p>
+</blockquote>
+<h2 id="1-狙击windows异常处理机制"><a href="#1-狙击windows异常处理机制" class="headerlink" title="1.狙击windows异常处理机制"></a>1.狙击windows异常处理机制</h2><p>一、S.E.H<br>S.E.H为异常处理结构体，他是Windows异常处理机制所采用的重要数据结构，每个S.E.H包含两个DWORD指针：S.E.H链表指针和异常处理函数句柄，共八个字节<br>（1）S.E.H 结构体存放在系统栈中。<br>（2）当线程初始化时，会自动向栈中安装一个 S.E.H，作为线程默认的异常处理。<br>（3）如果程序源代码中使用了<strong>try{}</strong>except{}或者 Assert 宏等异常处理机制，编译器将最终通过向当前函数栈帧中安装一个 S.E.H 来实现异常处理。<br>（4）栈中一般会同时存在多个 S.E.H。<br>（5）栈中的多个 S.E.H 通过链表指针在栈内由栈顶向栈底串成单向链表，位于链表最顶端的 S.E.H 通过 T.E.B（线程环境块）0 字节偏移处的指针标识。<br>（6）当异常发生时，操作系统会中断程序，并首先从 T.E.B 的 0 字节偏移处取出距离栈顶<br>最近的 S.E.H，使用异常处理函数句柄所指向的代码来处理异常。<br>（7）当离“事故现场”最近的异常处理函数运行失败时，将顺着 S.E.H 链表依次尝试其他的异常处理函数。<br>（8）如果程序安装的所有异常处理函数都不能处理，系统将采用默认的异常处理函数。通常，这个函数会弹出一个错误对话框，然后强制关闭程序。如下图是SEH链表结构<br><img src="" alt="iamge1"></p>
+<blockquote>
+<p>其实我个人认为，S.E.H就是在系统关闭程序之前，给程序一个执行预先设定的回调函数的机会，而且这个S.E.H是存放在栈中的，因此我们可以有很多想法了hhhhhh</p>
+</blockquote>
+<p>（1）S.E.H 存放在栈内，故溢出缓冲区的数据有可能淹没 S.E.H。<br>（2）精心制造的溢出数据可以把 S.E.H 中异常处理函数的入口地址更改为 shellcode 的起始地址。<br>（3）溢出后错误的栈帧或堆块数据往往会触发异常。<br>（4）当 Windows 开始处理溢出后的异常时，会错误地把 shellcode 当作异常处理函数而<br>执行。  </p>
+<p>二、在栈溢出中利用S.E.H<br>在栈溢出中利用S.E.H代码如下：  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;windows.h&gt; </span><br><span class="line">char shellcode[] = &quot;\x90\x90\x90\x90……&quot;; </span><br><span class="line">DWORD MyExceptionhandler(void) </span><br><span class="line">&#123; </span><br><span class="line">    printf(&quot;got an exception, press Enter to kill process!\n&quot;); </span><br><span class="line">    getchar(); </span><br><span class="line">    ExitProcess(1); </span><br><span class="line">&#125; </span><br><span class="line">void test(char * input) </span><br><span class="line">&#123; </span><br><span class="line">    char buf[200]; </span><br><span class="line">    int zero=0; </span><br><span class="line">    __asm int 3 //used to break process for debug </span><br><span class="line">    __try </span><br><span class="line">    &#123; </span><br><span class="line">        strcpy(buf,input); //overrun the stack </span><br><span class="line">        zero=4/zero; //generate an exception </span><br><span class="line">    &#125; </span><br><span class="line">    __except(MyExceptionhandler())&#123;&#125; </span><br><span class="line">&#125; </span><br><span class="line">main() </span><br><span class="line">&#123; </span><br><span class="line">    test(shellcode); </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对代码简要解释如下。<br>（1）函数 test 中存在典型的栈溢出漏洞。<br>（2）<strong>try{}会在 test 的函数栈帧中安装一个 S.E.H 结构。<br>（3）</strong>try 中的除零操作会产生一个异常。<br>（4）当 strcpy 操作没有产生溢出时，除零操作的异常将最终被 MyExceptionhandler 函数处理。<br>（5）当 strcpy 操作产生溢出，并精确地将栈帧中的 S.E.H 异常处理句柄修改shellcode 的入口地址时，操作系统将会错误地使用 shellcode 去处理除零异常，也就是说，代码植入成功。<br>（6）此外，异常处理机制与堆分配机制类似，会检测进程是否处于调试状态。如果直接使用调试器加载程序，异常处理会进入调试状态下的处理流程。因此，我们这里同样采用直接在代码中加入断点_asm int 3，让进程自动中断后再用调试器 attach 的方法进行调试。  </p>
+<blockquote>
+<p>具体的shellcode内部填充的代码就不具体说明了，其实主要是利用OD中查看到的SEH链，然后根据断点，向后找到字符串复制的汇编指令，然后根据该指令的地址，和SEH链中最近调用的地址，编码好shellcode，注意我们在OD中查找到的SEH链各个结点的地址，其实是指向的下一个SEH结点，在这个结点往后的下一个地址，才是异常处理函数的地址，就是说，根据OD查找到的结点地址，我们编写在shellcode中，要往后推4个字节！！！一定要注意这点，不要把地址弄错，前功尽弃。</p>
+</blockquote>
+<p>三、堆溢出利用S.E.H<br>同堆溢出的利用中，介绍的：狙击PEB中RtlEnterCritical-Section()的函数指针<br>主要是利用DWORD SHOOT</p>
+<blockquote>
+<p>在调试堆溢出的时候，除了要注意像上面所讲的，异常处理函数的地址要往后推4个字节，还要注意，确保OD能够捕捉所有的异常，查看设置–调试设置–异常–不要忽略任何异常</p>
+</blockquote>
+<p>四、深入挖掘windows异常处理</p>
+<blockquote>
+<p>同堆结构一样，微软没有公布异常处理机制，但是显然，有很多大佬对windows的异常处理机制有所研究和了解，如果单纯地利用SEH发现漏洞，其实知道改写SEH的地址就够了，但是很多专家和大佬们对异常处理机制了解的很深入、很透彻，因此为了提高，我也恬不知耻的进行了进一步的阅读和学习。</p>
+</blockquote>
+<p>（1）不同级别的SEH：<br> 异常处理的最小作用域是线程，每个线程都有自己的SEH链表，线程发生错误的时候先用自己的SEH进行处理，如果线程自身的SEH不能处理错误时，进程的SEH将发挥作用（此时将不仅会影响问题线程，会影响所有的线程）除了线程和进程SEH，操作系统会为程序提供一个默认的SEH，当前面所有的异常处理函数无法处理错误时，默认的异常处理函数将会被调用，显示一个对话框。  </p>
+<p> 所以整体流程可以概括如下：执行离栈顶最近的SEH的异常处理函数–执行所有的SEH链表中的异常处理函数–调用进程异常处理–调用程序异常处理  </p>
+<p> （2）线程的异常处理：  </p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag article-tag-list-link color2">0day安全</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag article-tag-list-link color2">内存攻击技术</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2019/11/23/0day%E5%AE%89%E5%85%A84--%E5%90%84%E7%A7%8D%E5%86%85%E5%AD%98%E6%94%BB%E5%87%BB%E6%8A%80%E6%9C%AF/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" target="_blank" rel="noopener" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-0day安全3--堆溢出的利用" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1062,11 +1165,15 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color1">0day安全 栈溢出</a>
+                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color2">0day安全</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color2">0day安全</a>
+                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color2">内存攻击技术</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color1">0day安全 栈溢出</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1074,19 +1181,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color5">操作系统</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color3">计网</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color1">cve漏洞</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color1">兔兔和小船</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1103,6 +1198,18 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color3">Exploit</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color5">操作系统</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color1">兔兔和小船</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color1">cve漏洞</a>
               </li>
             
             <div class="clearfix"></div>
