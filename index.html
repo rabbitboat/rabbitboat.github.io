@@ -192,7 +192,10 @@
 </blockquote>
 <p>（1）不同级别的SEH：<br> 异常处理的最小作用域是线程，每个线程都有自己的SEH链表，线程发生错误的时候先用自己的SEH进行处理，如果线程自身的SEH不能处理错误时，进程的SEH将发挥作用（此时将不仅会影响问题线程，会影响所有的线程）除了线程和进程SEH，操作系统会为程序提供一个默认的SEH，当前面所有的异常处理函数无法处理错误时，默认的异常处理函数将会被调用，显示一个对话框。  </p>
 <p> 所以整体流程可以概括如下：执行离栈顶最近的SEH的异常处理函数–执行所有的SEH链表中的异常处理函数–调用进程异常处理–调用程序异常处理  </p>
-<p> （2）线程的异常处理：  </p>
+<p> （2）线程的异常处理：<br> 线程用于异常处理的回调函数有4个参数：<br> pExcept、pFrame、pContext、pDispatch(具体用途在0day P188有介绍，其实这些参数就是记录着发生异常时的断点信息)，回调函数执行前，操作系统会将这些参数压栈，之后调用回调函数处理异常，比如遇到除零异常时，可以把寄存器的值改为非零。调用完回调函数，操作系统根据返回的结果决定下一步做什么<br> 0：代表异常成功处理，返回原程序发生异常的地方继续执行指令<br> 1：代表异常处理失败，将顺着SEH链表搜索其他的异常处理函数   </p>
+<blockquote>
+<p>在这里额外介绍一个异常处理的操作：unwind操作，异常发生时系统会顺着SEH链表搜索能够处理异常的句柄，一旦找到了合适的句柄，系统会把遍历过的SEH函数再调用以便，主要是为了通知前边处理失败的SEH，清理现场、释放资源，之后这些SEH结构体将从链表中拆除。其实就是调用了SEH两边，第一次是找到合适的函数处理异常，第二次是释放资源，这种操作可以保证异常处理的正确、稳定。<br> 如何保证异常处理函数知道自己是第几次调用？是通过回调函数第一个参数所指向的结构体的设置，来标明被调用过。</p>
+</blockquote>
 
       
 
@@ -1169,14 +1172,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color2">内存攻击技术</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color1">0day安全 栈溢出</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color4">堆溢出</a>
               </li>
              
@@ -1201,15 +1196,23 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color1">0day安全 栈溢出</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color2">内存攻击技术</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color5">操作系统</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color1">兔兔和小船</a>
+                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color1">cve漏洞</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color1">cve漏洞</a>
+                <a href="javascript:void(0)" target="_blank" rel="noopener" class="js-tag color1">兔兔和小船</a>
               </li>
             
             <div class="clearfix"></div>
